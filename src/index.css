@@ -18,6 +18,43 @@ body {
   color: #f1f5f9;
   overflow-x: hidden;
   letter-spacing: -0.02em;
+  transition: filter 1s ease-in-out, background 1s ease-in-out;
+}
+
+body.stealth-active {
+  background-color: #000000 !important;
+  background-image: 
+    linear-gradient(rgba(147, 51, 234, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(147, 51, 234, 0.015) 1px, transparent 1px) !important;
+  filter: saturate(18%) brightness(82%) contrast(115%);
+}
+
+body.stealth-active .glass {
+  background: rgba(2, 2, 5, 0.97) !important;
+  border-color: rgba(147, 51, 234, 0.1) !important;
+  box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.95);
+}
+
+body.stealth-active .crt-overlay {
+  background: linear-gradient(rgba(147, 51, 234, 0.08) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(139, 92, 246, 0.01), rgba(0, 0, 0, 0.02), rgba(139, 92, 246, 0.01));
+  opacity: 0.28;
+  filter: grayscale(100%) contrast(180%);
+}
+
+body.stealth-active .crt-vignette {
+  background: radial-gradient(circle, transparent 25%, rgba(0,0,0,0.92) 100%);
+}
+
+body.stealth-active .crt-flicker {
+  animation: stealth-flicker 0.08s infinite;
+  background: rgba(139, 92, 246, 0.003);
+}
+
+@keyframes stealth-flicker {
+  0% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+  100% { opacity: 0.15; }
 }
 
 .stealth-active {

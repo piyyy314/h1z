@@ -54,7 +54,7 @@ import { TacticalScriptEnv } from './components/TacticalScriptEnv.tsx';
 import { RemoteAccessTerminal } from './components/RemoteAccessTerminal.tsx';
 import { audioController } from './services/audioService.ts';
 import { calculateLookAngles } from './utils/geoUtils.ts';
-import { Coordinates, Satellite, LookAngles, WeatherCondition, MainView, SatelliteStatus, TacticalEvent } from './types.ts';
+import { Coordinates, Satellite, LookAngles, WeatherCondition, MainView, TacticalEvent } from './types.ts';
 import { COMMON_SATELLITES } from './constants.ts';
 
 const STORAGE_KEY = 'satexpert_tactical_v5';
@@ -188,7 +188,14 @@ export const App: React.FC = () => {
   }, [userLoc, selectedSat, defcon]);
 
   useEffect(() => {
-    if (!isFirstMount.current) localStorage.setItem(STEALTH_STORAGE_KEY, JSON.stringify(isStealthMode));
+    if (!isFirstMount.current) {
+      localStorage.setItem(STEALTH_STORAGE_KEY, JSON.stringify(isStealthMode));
+    }
+    if (isStealthMode) {
+      document.body.classList.add('stealth-active');
+    } else {
+      document.body.classList.remove('stealth-active');
+    }
   }, [isStealthMode]);
 
   useEffect(() => {
@@ -209,6 +216,11 @@ export const App: React.FC = () => {
 
   return (
     <div className={`crt-screen min-h-screen ${(!isStealthMode && (isJamming || defcon === 1)) ? 'crt-distorted' : ''}`}>
+      {/* CRT Overlay Effects */}
+      <div className="crt-overlay" />
+      <div className="crt-vignette" />
+      <div className="crt-flicker" />
+
       {apiKeyError && (
         <div className="bg-red-600 text-white py-2 px-4 text-center font-black text-[10px] tracking-[0.5em] uppercase animate-pulse z-[9999] relative">
           [VOICE_UPLINK_FAILURE] {apiKeyError}
@@ -233,7 +245,23 @@ export const App: React.FC = () => {
                       <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">BRIDGE_CONTROL_INTERFACE_V5.4</span>
                    </div>
                    <div className="flex items-center space-x-4">
-                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-1 rounded border border-slate-800">UPLINK: ACTIVE</span>
+                      <button 
+                        onClick={() => {
+                          const nextStealth = !isStealthMode;
+                           setIsStealthMode(nextStealth);
+                           addMissionLog(nextStealth ? "STEALTH_MODE_ENGAGED: MASKING ALL TELEMETRY TRANSMISSIONS" : "STEALTH_MODE_DISENGAGED: RESUMING NORMAL OPERATION", "warning");
+                        }}
+                        className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1 rounded-lg border transition-all duration-300 flex items-center space-x-2 ${
+                           isStealthMode 
+                             ? 'bg-purple-950/80 border-purple-500 text-purple-400 font-bold shadow-[0_0_10px_rgba(168,85,247,0.3)] animate-pulse'
+                             : 'bg-slate-900 hover:bg-slate-800 border-slate-850 text-slate-400 hover:text-cyan-400'
+                        }`}
+                        title="Toggle Stealth Mode"
+                      >
+                         <span className={`w-1.5 h-1.5 rounded-full ${isStealthMode ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'bg-slate-500'}`}></span>
+                         <span>STEALTH: {isStealthMode ? "ACTIVE" : "OFFLINE"}</span>
+                      </button>
+                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-1 rounded border border-slate-800">UPLINK: {isStealthMode ? "MASKED" : "ACTIVE"}</span>
                       <span className="text-[9px] font-mono text-slate-400 font-bold tracking-widest">{new Date().toISOString()}</span>
                    </div>
                 </div>
@@ -242,8 +270,15 @@ export const App: React.FC = () => {
                   {VIEW_CATEGORIES.map(cat => (
                     <div key={cat.name} className="space-y-4">
                        <div className="flex items-center justify-between mx-1">
-                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{cat.name}</span>
-                          <div className="w-8 h-[1px] bg-slate-800"></div>
+                          <span className={`text-[9px] font-black uppercase tracking-[0.2em] flex flex-wrap items-center gap-1.5 ${isStealthMode ? 'text-red-500/80' : 'text-slate-500'}`}>
+                            <span>{cat.name}</span>
+                            {isStealthMode && (
+                              <span className="text-[7px] text-red-550 font-mono animate-pulse tracking-normal uppercase bg-red-950/25 px-1 rounded border border-red-900/40">
+                                EMERGENCY_WARNING
+                              </span>
+                            )}
+                          </span>
+                          <div className={`w-8 h-[1px] ${isStealthMode ? 'bg-red-950/60' : 'bg-slate-800'}`}></div>
                        </div>
                        <div className="flex flex-wrap gap-2 p-1">
                           {cat.views.map((v) => (
@@ -252,8 +287,12 @@ export const App: React.FC = () => {
                               onClick={() => setView(v as MainView)}
                               className={`px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border-2 ${
                                 view === v 
-                                  ? 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-[0_0_25px_rgba(34,211,238,0.3)] scale-105 z-10' 
-                                  : 'text-slate-500 border-slate-900/50 hover:border-slate-700 hover:text-cyan-400 hover:bg-slate-900/80 active:scale-95'
+                                  ? isStealthMode
+                                    ? 'bg-red-950/80 border-red-500 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.35)] scale-105 z-10'
+                                    : 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-[0_0_25px_rgba(34,211,238,0.3)] scale-105 z-10' 
+                                  : isStealthMode
+                                    ? 'text-red-700/60 border-red-950/25 hover:border-red-500/40 hover:text-red-400 hover:bg-red-950/30 active:scale-95'
+                                    : 'text-slate-500 border-slate-900/50 hover:border-slate-700 hover:text-cyan-400 hover:bg-slate-900/80 active:scale-95'
                               }`}
                             >
                                {v.replace('_', ' ')}
@@ -265,26 +304,49 @@ export const App: React.FC = () => {
                 </div>
               </div>
               
-              <div className="w-px bg-slate-800/60 hidden xl:block self-stretch mx-2"></div>
+              <div className={`w-px hidden xl:block self-stretch mx-2 ${isStealthMode ? 'bg-red-950/40' : 'bg-slate-800/60'}`}></div>
 
               <div className="flex flex-col justify-center min-w-[120px]">
                 <div className="flex items-center space-x-2 mb-4 px-1">
-                   <ShieldCheck className="w-4 h-4 text-slate-600" />
-                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Defcon</span>
+                   <ShieldCheck className={`w-4 h-4 ${isStealthMode ? 'text-red-500/85 animate-pulse' : 'text-slate-600'}`} />
+                   <div className="flex flex-col">
+                     <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isStealthMode ? 'text-red-500/85' : 'text-slate-500'}`}>
+                       Defcon
+                     </span>
+                     {isStealthMode && (
+                       <span className="text-[6.5px] font-mono tracking-tighter text-red-500/80 font-black animate-pulse leading-none uppercase">
+                         EMERGENCY_WARNING
+                       </span>
+                     )}
+                   </div>
                 </div>
-                <div className="flex flex-col space-y-1.5 bg-slate-950/40 p-2 rounded-2xl border border-slate-800/30">
+                <div className={`flex flex-col space-y-1.5 p-2 rounded-2xl border ${
+                  isStealthMode 
+                    ? 'bg-slate-950 border-red-950/65 shadow-[inset_0_0_12px_rgba(239,68,68,0.05)]' 
+                    : 'bg-slate-950/40 border-slate-800/30'
+                }`}>
                   {[1, 2, 3, 4, 5].map(lvl => (
                     <button 
                       key={lvl} 
                       onClick={() => setDefcon(lvl)} 
                       className={`h-8 rounded-xl flex items-center px-4 space-x-3 text-[10px] font-black transition-all border ${
                         defcon === lvl 
-                          ? (lvl <= 2 ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40') 
-                          : 'bg-slate-900/60 border-slate-800/40 text-slate-600 hover:border-slate-700'
+                          ? isStealthMode
+                            ? 'bg-red-950/80 border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.35)]'
+                            : (lvl <= 2 ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40') 
+                          : isStealthMode
+                            ? 'bg-slate-900/30 border-red-950/15 text-red-900/40 hover:border-red-900/40 hover:text-red-400 hover:bg-red-955/10'
+                            : 'bg-slate-900/60 border-slate-800/40 text-slate-600 hover:border-slate-700'
                       }`}
                     >
                       <span className="w-4">{lvl}</span>
-                      <div className={`h-1 flex-grow rounded-full ${defcon === lvl ? (lvl <= 2 ? 'bg-white' : 'bg-cyan-400') : 'bg-slate-800'}`}></div>
+                      <div className={`h-1 flex-grow rounded-full ${
+                        defcon === lvl 
+                          ? isStealthMode 
+                            ? 'bg-red-400' 
+                            : (lvl <= 2 ? 'bg-white' : 'bg-cyan-400') 
+                          : 'bg-slate-800'
+                      }`}></div>
                     </button>
                   ))}
                 </div>
