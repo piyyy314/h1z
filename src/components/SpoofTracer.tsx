@@ -5,9 +5,12 @@ export const SpoofTracer: React.FC = () => {
   const [driftX, setDriftX] = useState<number>(0.005);
   const [driftY, setDriftY] = useState<number>(-0.003);
   const [spoofRisk, setSpoofRisk] = useState<'LOW' | 'HIGH' | 'CRITICAL'>('LOW');
+  const [prevRisk, setPrevRisk] = useState<'LOW' | 'HIGH' | 'CRITICAL'>('LOW');
   const [isCalibrating, setIsCalibrating] = useState<boolean>(false);
   const [isFilterActive, setIsFilterActive] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>(['[SPOOF] GPS correlation validator active.']);
+  const [alertLevel, setAlertLevel] = useState<'HIGH' | 'CRITICAL' | null>(null);
+  const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
   const addLog = (msg: string) => {
     setLogs(prev => [`[${new Date().toLocaleTimeString([], { hour12: false })}] ${msg.toUpperCase()}`, ...prev].slice(0, 10));
@@ -32,6 +35,18 @@ export const SpoofTracer: React.FC = () => {
     return () => clearInterval(interval);
   }, [driftX, driftY]);
 
+  // Alert trigger on risk escalation to HIGH or CRITICAL
+  useEffect(() => {
+    if (spoofRisk !== prevRisk) {
+      if (spoofRisk === 'HIGH' || spoofRisk === 'CRITICAL') {
+        setAlertLevel(spoofRisk);
+        setIsAlertOpen(true);
+        addLog(`ALERT TRANSITION: Spoof risk escalated to ${spoofRisk}! Triggering defense protocols.`);
+      }
+      setPrevRisk(spoofRisk);
+    }
+  }, [spoofRisk, prevRisk]);
+
   const handleRecalibrateRef = () => {
     if (isCalibrating) return;
     setIsCalibrating(true);
@@ -41,13 +56,82 @@ export const SpoofTracer: React.FC = () => {
       setDriftX(0.0004);
       setDriftY(-0.0002);
       setSpoofRisk('LOW');
+      setIsAlertOpen(false);
       addLog(`Delay lock re-established. Spoof reference delta stabilized.`);
       setIsCalibrating(false);
     }, 1200);
   };
 
   return (
-    <div className="p-6 bg-slate-950 border-2 border-slate-900 rounded-3xl text-slate-100 flex flex-col space-y-6 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+    <div className={`p-6 bg-slate-950 border-2 rounded-3xl text-slate-100 flex flex-col space-y-6 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 relative transition-all duration-500 ${
+      spoofRisk === 'CRITICAL'
+        ? 'border-red-650 shadow-[0_0_35px_rgba(239,68,68,0.35)] lg:animate-none animate-pulse'
+        : spoofRisk === 'HIGH'
+          ? 'border-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.2)]'
+          : 'border-slate-900'
+    }`}>
+      {/* Visual Alert Warning Banner for continuous persistent view */}
+      {(spoofRisk === 'HIGH' || spoofRisk === 'CRITICAL') && (
+        <div className={`absolute top-0 inset-x-0 h-1.5 ${spoofRisk === 'CRITICAL' ? 'bg-red-600 animate-pulse' : 'bg-amber-500'} z-20`}></div>
+      )}
+
+      {/* Interactive Modal Warning Overlay Dialog */}
+      {isAlertOpen && alertLevel && (
+        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-250">
+          <div className={`p-6 max-w-md w-full rounded-2xl border-2 bg-slate-950 flex flex-col space-y-5 font-mono shadow-2xl relative ${
+            alertLevel === 'CRITICAL' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.25)]' : 'border-amber-500 shadow-[0_0_20px_rgba(217,119,6,0.2)]'
+          }`}>
+            <div className="flex items-center space-x-3.5 border-b border-wrap pb-3" style={{ borderColor: alertLevel === 'CRITICAL' ? 'rgba(239,68,68,0.2)' : 'rgba(217,119,6,0.2)' }}>
+              <ShieldAlert className={`w-8 h-8 ${alertLevel === 'CRITICAL' ? 'text-red-500 animate-bounce' : 'text-amber-500'}`} />
+              <div>
+                <h4 className={`text-xs font-black uppercase tracking-widest ${alertLevel === 'CRITICAL' ? 'text-red-500' : 'text-amber-500'}`}>
+                  {alertLevel === 'CRITICAL' ? 'CRITICAL SPOOF ATTACK' : 'HIGH CARRIER DRIFT WARNING'}
+                </h4>
+                <p className="text-[8px] text-slate-400 uppercase tracking-wider">Telemetry correlation engine failed consistency audit</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-[9px] text-slate-300 uppercase leading-relaxed">
+              <p>
+                The validation parser has isolated a critical divergence in active S-Band telemetry phase references.
+              </p>
+              <div className="bg-black/80 p-2.5 rounded-lg border border-slate-900 space-y-1 font-mono text-[8px]">
+                <div>DETECTED RISK LEVEL: <span className={alertLevel === 'CRITICAL' ? 'text-red-400 font-bold' : 'text-amber-400 font-bold'}>{alertLevel}</span></div>
+                <div>X-AXIS DEVIATION: <span className="text-cyan-400 font-bold">{driftX}°</span></div>
+                <div>Y-AXIS DEVIATION: <span className="text-cyan-400 font-bold">{driftY}°</span></div>
+                <div>TOTAL DELTA RADIUS: <span className="text-red-405 font-bold">{(Math.abs(driftX) + Math.abs(driftY)).toFixed(4)}° / THRESHOLD</span></div>
+              </div>
+              <p className="text-xs text-red-400 font-bold animate-pulse text-center pt-1 tracking-wider">
+                [COORDINATES UNRELIABLE - ACTIVE JAMMING IMPLICATED]
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3.5 pt-2">
+              <button
+                onClick={() => {
+                  setIsAlertOpen(false);
+                  addLog('ALERT OVERRIDE: Warning dialog acknowledged manually.');
+                }}
+                className="bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:text-white py-2 rounded-xl text-[9px] uppercase tracking-wider transition font-medium"
+              >
+                Mute Warning
+              </button>
+              <button
+                onClick={() => {
+                  handleRecalibrateRef();
+                }}
+                className={`py-2 rounded-xl text-[9px] uppercase tracking-wider transition font-bold border ${
+                  alertLevel === 'CRITICAL'
+                    ? 'bg-red-950/80 hover:bg-red-900 border-red-500 text-red-200'
+                    : 'bg-amber-950/80 hover:bg-amber-900 border-amber-500 text-amber-200'
+                }`}
+              >
+                Auto-Recalibrate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-4">
         <div className="flex items-center space-x-3">

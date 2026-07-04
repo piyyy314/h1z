@@ -52,6 +52,8 @@ import { QuantumDecryptor } from './components/QuantumDecryptor.tsx';
 import { BiometricScanner } from './components/BiometricScanner.tsx';
 import { TacticalScriptEnv } from './components/TacticalScriptEnv.tsx';
 import { RemoteAccessTerminal } from './components/RemoteAccessTerminal.tsx';
+import { Sentinel } from './components/Sentinel.tsx';
+import { Infrastructure } from './components/Infrastructure.tsx';
 import { audioController } from './services/audioService.ts';
 import { calculateLookAngles } from './utils/geoUtils.ts';
 import { Coordinates, Satellite, LookAngles, WeatherCondition, MainView, TacticalEvent } from './types.ts';
@@ -210,8 +212,8 @@ export const App: React.FC = () => {
     { name: 'TACTICAL_BASE', views: ['tactical', 'constellation', 'satellite_detail', 'mesh', 'weather', 'geolocator'] },
     { name: 'SIGINT_SUITE', views: ['intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner'] },
     { name: 'ACTIVE_OPS', views: ['tactical_suite', 'warfare', 'planner', 'neural', 'orbital_strike', 'drone_swarm', 'kill_chain', 'cyber_attack', 'signal_jamming', 'botnet_command', 'script_env', 'remote_access'] },
-    { name: 'CYBER_CMD', views: ['defense', 'simulation', 'aegis', 'usb_manager', 'vsat_config', 'grover'] },
-    { name: 'AUX_DATA', views: ['media', 'live', 'calculations', 'terrain', 'news'] }
+    { name: 'CYBER_CMD', views: ['defense', 'simulation', 'aegis', 'usb_manager', 'vsat_config', 'grover', 'sentinel'] },
+    { name: 'AUX_DATA', views: ['media', 'live', 'calculations', 'terrain', 'news', 'infrastructure'] }
   ];
 
   return (
@@ -613,6 +615,18 @@ export const App: React.FC = () => {
             {view === 'news' && (
               <div className="max-w-4xl mx-auto">
                 <RSSReader />
+              </div>
+            )}
+
+            {view === 'sentinel' && (
+              <div className="max-w-6xl mx-auto">
+                <Sentinel isStealthMode={isStealthMode} addMissionLog={addMissionLog} />
+              </div>
+            )}
+
+            {view === 'infrastructure' && (
+              <div className="max-w-6xl mx-auto">
+                <Infrastructure isStealthMode={isStealthMode} addMissionLog={addMissionLog} />
               </div>
             )}
           </div>
