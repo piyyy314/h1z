@@ -15,7 +15,17 @@ const DECODED_PRESETS: DecodedStream[] = [
   { id: '3', source: 'MIL-SATCOM-4', frequency: '7250.0 MHz', strength: '-38.2 dBm', decrypted: 'VOICE_FEED_ESTABLISHED: ENCRYPTED_COMPATIBILITY_LOCKED' },
 ];
 
-export const SignalInterceptor: React.FC = () => {
+interface SignalInterceptorProps {
+  isJamming?: boolean;
+  jammingPower?: number;
+  isStealthMode?: boolean;
+}
+
+export const SignalInterceptor: React.FC<SignalInterceptorProps> = ({
+  isJamming,
+  jammingPower,
+  isStealthMode
+}) => {
   const [isActive, setIsActive] = useState<boolean>(true);
   const [selectedPreset, setSelectedPreset] = useState<DecodedStream>(DECODED_PRESETS[0]);
   const [bits, setBits] = useState<string[]>([]);

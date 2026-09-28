@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Target, RefreshCw, Cpu, Wifi, ShieldCheck, Play, Pause, AlertTriangle } from 'lucide-react';
 
-export const TelemetryPulse: React.FC = () => {
+interface TelemetryPulseProps {
+  telemetry?: any;
+  isStealthMode?: boolean;
+}
+
+export const TelemetryPulse: React.FC<TelemetryPulseProps> = ({ telemetry, isStealthMode }) => {
   const [pulseSnr, setPulseSnr] = useState<number>(16.2);
   const [pulsePower, setPulsePower] = useState<number>(-42.5);
   const [pulseLoss, setPulseLoss] = useState<number>(0.0);

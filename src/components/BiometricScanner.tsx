@@ -15,7 +15,11 @@ const OPERATORS: OperatorProfile[] = [
   { name: 'Lt. Mason Cole', rank: 'Orbital Intercept Ops', id: 'OIO-8812-C', clearance: 'RESTRICTED', pulse: 82 },
 ];
 
-export const BiometricScanner: React.FC = () => {
+interface BiometricScannerProps {
+  addMissionLog?: (detail: string, status?: any) => void;
+}
+
+export const BiometricScanner: React.FC<BiometricScannerProps> = ({ addMissionLog }) => {
   const [activeOperator, setActiveOperator] = useState<OperatorProfile>(OPERATORS[0]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [hasScanned, setHasScanned] = useState<boolean>(false);

@@ -3,12 +3,31 @@ import { Compass, Radio, ShieldCheck, RefreshCw, Layers, Star, Navigation } from
 import { Satellite } from '../types.ts';
 
 interface DetailProps {
-  satellites: Satellite[];
-  selectedSat: Satellite;
-  onSelectSat: (sat: Satellite) => void;
+  satellites?: Satellite[];
+  selectedSat?: Satellite;
+  onSelectSat?: (sat: Satellite) => void;
+  satellite?: Satellite;
+  lookAngles?: any;
+  isStealthMode?: boolean;
+  isJamming?: boolean;
+  jammingPower?: number;
+  weather?: string;
 }
 
-export const SatelliteDetail: React.FC<DetailProps> = ({ satellites, selectedSat, onSelectSat }) => {
+export const SatelliteDetail: React.FC<DetailProps> = ({
+  satellites = [],
+  selectedSat: selectedSatProp,
+  onSelectSat,
+  satellite
+}) => {
+  const activeSat = selectedSatProp || satellite || satellites[0] || {
+    id: 'sat-1',
+    name: 'TACTICAL-SAT',
+    longitude: 0,
+    orbitalSlot: '0°E',
+    altitude: 35786,
+    type: 'Ku'
+  };
   const [operatorLogs, setOperatorLogs] = useState<string[]>(['[DETAIL] Satellite hardware telemetry monitoring grid engaged.']);
 
   const addLog = (msg: string) => {
@@ -33,21 +52,25 @@ export const SatelliteDetail: React.FC<DetailProps> = ({ satellites, selectedSat
       <div className="flex flex-col space-y-1">
         <span className="text-[7px] font-black uppercase text-slate-500 tracking-wider">Configure Active Satellite</span>
         <select
-          value={selectedSat.id}
+          value={activeSat.id}
           onChange={(e) => {
             const sat = satellites.find(s => s.id === e.target.value);
-            if (sat) {
+            if (sat && onSelectSat) {
               onSelectSat(sat);
               addLog(`Aligned operational targeting coordinate grids with ${sat.name}`);
             }
           }}
           className="w-full bg-slate-950 text-xs font-mono py-1.5 px-2.5 border border-slate-900 rounded-xl focus:outline-none focus:border-cyan-500 cursor-pointer"
         >
-          {satellites.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} ({s.type} band)
-            </option>
-          ))}
+          {satellites.length > 0 ? (
+            satellites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.type || 'Ku'} band)
+              </option>
+            ))
+          ) : (
+            <option value={activeSat.id}>{activeSat.name} ({activeSat.type || 'Ku'} band)</option>
+          )}
         </select>
       </div>
 
@@ -55,17 +78,17 @@ export const SatelliteDetail: React.FC<DetailProps> = ({ satellites, selectedSat
       <div className="grid grid-cols-2 gap-2 text-[7.5px] font-mono leading-relaxed">
         <div className="bg-black/40 border border-slate-900/60 p-2 rounded-xl">
           <span className="text-slate-505 uppercase block">Orbital Altitude</span>
-          <strong className="text-slate-205 text-[10px]">{selectedSat.altitude} Km</strong>
+          <strong className="text-slate-205 text-[10px]">{activeSat.altitude ?? 35786} Km</strong>
         </div>
 
         <div className="bg-black/40 border border-slate-900/60 p-2 rounded-xl">
           <span className="text-slate-550 uppercase block">Transceiver Type</span>
-          <strong className="text-slate-205 text-[10px]">{selectedSat.type} Band</strong>
+          <strong className="text-slate-205 text-[10px]">{activeSat.type || 'Ku'} Band</strong>
         </div>
 
         <div className="bg-black/40 border border-slate-900/60 p-2 rounded-xl col-span-2">
           <span className="text-slate-505 uppercase block">Active Satellite Name Tag</span>
-          <strong className="text-cyan-405 text-[10px]">{selectedSat.name} OPERATIONAL</strong>
+          <strong className="text-cyan-405 text-[10px]">{activeSat.name} OPERATIONAL</strong>
         </div>
       </div>
 

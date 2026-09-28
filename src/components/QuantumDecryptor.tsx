@@ -15,7 +15,11 @@ const SECURE_CHANNELS: CiphertextRecord[] = [
   { id: '3', name: 'Encrypted Diplomatic Brief', bitLength: 4096, cipher: '0xA99FE3B1D5C4092E11AF1004FEAE392D', decrypted: 'OPERATION_AURORA_SITREP: ACTIVE_MEMBER_LIST_LOCKED' },
 ];
 
-export const QuantumDecryptor: React.FC = () => {
+interface QuantumDecryptorProps {
+  addMissionLog?: (detail: string, status?: any) => void;
+}
+
+export const QuantumDecryptor: React.FC<QuantumDecryptorProps> = ({ addMissionLog }) => {
   const [activeRecord, setActiveRecord] = useState<CiphertextRecord>(SECURE_CHANNELS[0]);
   const [cryptAlgorithm, setCryptAlgorithm] = useState<'SHOR' | 'ANNEALING' | 'GROVER_BRUTE'>('SHOR');
   const [isDecrypting, setIsDecrypting] = useState<boolean>(false);

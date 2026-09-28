@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Layers, Compass, Radio, RefreshCw, Star, Orbit } from 'lucide-react';
+import { Satellite } from '../types.ts';
 
 interface ConstellationState {
   orbitType: 'LEO' | 'MEO' | 'GEO';
@@ -8,7 +9,19 @@ interface ConstellationState {
   coherence: string;
 }
 
-export const ConstellationView: React.FC = () => {
+interface ConstellationViewProps {
+  satellites?: Satellite[];
+  selectedSat?: Satellite;
+  onSatSelect?: (sat: Satellite) => void;
+  isStealthMode?: boolean;
+}
+
+export const ConstellationView: React.FC<ConstellationViewProps> = ({
+  satellites,
+  selectedSat,
+  onSatSelect,
+  isStealthMode
+}) => {
   const [constState, setConstState] = useState<ConstellationState>({
     orbitType: 'LEO',
     satCount: 32,

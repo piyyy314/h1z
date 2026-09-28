@@ -20,6 +20,8 @@ export interface Satellite {
   launchDate?: string;
   period?: number;
   status?: SatelliteStatus;
+  altitude?: number;
+  type?: string;
 }
 
 export interface LookAngles {
@@ -60,7 +62,7 @@ export interface TacticalEvent {
   timestamp: string;
   satName: string;
   satId: string;
-  status: SatelliteStatus | 'CRITICAL' | 'BREACH' | 'INFO' | 'STRIKE';
+  status: SatelliteStatus | 'CRITICAL' | 'BREACH' | 'INFO' | 'STRIKE' | 'warning' | 'success' | 'info' | 'active' | string;
   detail: string;
 }
 

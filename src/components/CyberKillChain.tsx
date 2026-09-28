@@ -9,7 +9,11 @@ interface KillChainStage {
   status: 'MITIGATED' | 'COMPROMISED' | 'MONITORING';
 }
 
-export const CyberKillChain: React.FC = () => {
+interface CyberKillChainProps {
+  addMissionLog?: (detail: string, status?: any) => void;
+}
+
+export const CyberKillChain: React.FC<CyberKillChainProps> = ({ addMissionLog }) => {
   const [stages, setStages] = useState<KillChainStage[]>([
     { phase: 1, name: 'Reconnaissance', threat: 'Subnet sweeps on VSAT receiver ports', countermeasure: 'Integrate NodeScanner blockades & IP maskers', status: 'MITIGATED' },
     { phase: 2, name: 'Weaponization', threat: 'Crafting targeted satellite telemetry exploits', countermeasure: 'Keep core Dilithium post-quantum keys updated', status: 'MITIGATED' },

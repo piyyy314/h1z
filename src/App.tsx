@@ -86,7 +86,7 @@ export const App: React.FC = () => {
   const isFirstMount = useRef(true);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
 
-  const addMissionLog = useCallback((detail: string, status: TacticalEvent['status'] = 'active') => {
+  const addMissionLog = useCallback((detail: string, status: any = 'active') => {
     const newEvent: TacticalEvent = {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: new Date().toLocaleTimeString([], { hour12: false }),
@@ -399,7 +399,7 @@ export const App: React.FC = () => {
                     </div>
                   </div>
                   {lookAngles && <LookAngleCard angles={lookAngles} satellite={selectedSat} />}
-                  <SignalVisualizer quality={lookAngles?.elevation && lookAngles.elevation > 0 ? 85 : 0} isJamming={isJamming} jammingPower={jammingPower} rainFade={weather === 'CLEAR' ? 0.5 : 5.0} isStealthMode={isStealthMode} />
+                  <SignalVisualizer quality={lookAngles?.elevation && lookAngles.elevation > 0 ? 85 : 0} isJamming={isJamming} jammingPower={jammingPower} rainFade={weather === 'CLEAR' ? 0.5 : 5.0} isStealthMode={isStealthMode} snr={telemetry.snr} />
                 </div>
                 <div className="lg:col-span-7 xl:col-span-8">
                   <AITechnician 
@@ -429,7 +429,10 @@ export const App: React.FC = () => {
 
             {view === 'satellite_detail' && (
               <SatelliteDetail 
-                satellite={selectedSat} 
+                satellite={selectedSat}
+                selectedSat={selectedSat}
+                satellites={satellites}
+                onSelectSat={(sat) => setSelectedSat(sat)}
                 lookAngles={lookAngles} 
                 isStealthMode={isStealthMode} 
                 isJamming={isJamming} 
