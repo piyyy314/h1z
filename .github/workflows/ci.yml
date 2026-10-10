@@ -1,0 +1,40 @@
+name: CI & Security Audit
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    name: Build, Test & Security Verification
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 20.x, 22.x ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: TypeScript Static Typecheck
+        run: npm run lint
+
+      - name: Run Test Suite (Vitest)
+        run: npm test
+
+      - name: Production Bundle Build
+        run: npm run build
+
+      - name: Security Vulnerability Scan
+        run: npm audit --audit-level=critical || true

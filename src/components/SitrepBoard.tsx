@@ -1,13 +1,14 @@
 import React from 'react';
-import { ShieldCheck, Crosshair, AlertOctagon, Terminal, Radio } from 'lucide-react';
+import { ShieldCheck, Crosshair, AlertOctagon, Terminal, Radio, FileText } from 'lucide-react';
 import { Satellite } from '../types.ts';
 
 interface SitrepProps {
   selectedSatellite: Satellite;
   defcon: number;
+  onOpenReport?: () => void;
 }
 
-export const SitrepBoard: React.FC<SitrepProps> = ({ selectedSatellite, defcon }) => {
+export const SitrepBoard: React.FC<SitrepProps> = ({ selectedSatellite, defcon, onOpenReport }) => {
   // Map DEFCON levels to specific threat ratings and operational procedures
   let alertName = 'NOMINAL_READINESS_DECLARED';
   let levelColor = 'text-emerald-450 border-emerald-900/40 bg-emerald-950/10';
@@ -80,6 +81,17 @@ export const SitrepBoard: React.FC<SitrepProps> = ({ selectedSatellite, defcon }
           </p>
         </div>
       </div>
+
+      {onOpenReport && (
+        <button
+          type="button"
+          onClick={onOpenReport}
+          className="mt-2 w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/40 text-cyan-300 text-[10px] font-mono font-bold tracking-wider uppercase transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)] hover:shadow-[0_0_18px_rgba(6,182,212,0.4)]"
+        >
+          <FileText className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Export Tactical Report (PDF)</span>
+        </button>
+      )}
     </div>
   );
 };

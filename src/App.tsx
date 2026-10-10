@@ -1,7 +1,12 @@
 
 import * as React from 'react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { 
+  ShieldCheck, Radio, Compass, Activity, Search, Wifi, AlertTriangle, 
+  Zap, Cpu, Terminal, Crosshair, Globe, Layers, Lock, ShieldAlert, 
+  Filter, Orbit, Gauge, Eye, EyeOff, Satellite as SatIcon, RefreshCw,
+  Sliders, Shield, FileText
+} from 'lucide-react';
 import { Layout } from './components/Layout.tsx';
 import { LookAngleCard } from './components/LookAngleCard.tsx';
 import { AITechnician } from './components/AITechnician.tsx';
@@ -30,6 +35,7 @@ import { GroverVisualizer } from './components/GroverVisualizer.tsx';
 import { VSATConfig } from './components/VSATConfig.tsx';
 import { QuantumEntropy } from './components/QuantumEntropy.tsx';
 import { SitrepBoard } from './components/SitrepBoard.tsx';
+import { TacticalReportModal } from './components/TacticalReportModal.tsx';
 import { SpectralCanary } from './components/SpectralCanary.tsx';
 import { SpectrumAnalyzer } from './components/SpectrumAnalyzer.tsx';
 import { ConnectivityMesh } from './components/ConnectivityMesh.tsx';
@@ -82,6 +88,7 @@ export const App: React.FC = () => {
   // Global Event Log State
   const [eventLogs, setEventLogs] = useState<TacticalEvent[]>([]);
   const [hasNewLogs, setHasNewLogs] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const isFirstMount = useRef(true);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
@@ -208,13 +215,72 @@ export const App: React.FC = () => {
     setLookAngles(calculateLookAngles(userLoc, selectedSat.longitude));
   }, [userLoc, selectedSat]);
 
-  const VIEW_CATEGORIES = [
-    { name: 'TACTICAL_BASE', views: ['tactical', 'constellation', 'satellite_detail', 'mesh', 'weather', 'geolocator'] },
-    { name: 'SIGINT_SUITE', views: ['intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner'] },
-    { name: 'ACTIVE_OPS', views: ['tactical_suite', 'warfare', 'planner', 'neural', 'orbital_strike', 'drone_swarm', 'kill_chain', 'cyber_attack', 'signal_jamming', 'botnet_command', 'script_env', 'remote_access'] },
-    { name: 'CYBER_CMD', views: ['defense', 'simulation', 'aegis', 'usb_manager', 'vsat_config', 'grover', 'sentinel'] },
-    { name: 'AUX_DATA', views: ['media', 'live', 'calculations', 'terrain', 'news', 'infrastructure'] }
-  ];
+  const VIEW_CATEGORIES = useMemo(() => [
+    { 
+      id: 'TACTICAL_BASE',
+      name: 'Tactical Base',
+      icon: Orbit,
+      tagline: 'Look angles, constellation orbits, hardware specs & mesh',
+      views: ['tactical', 'constellation', 'satellite_detail', 'mesh', 'weather', 'geolocator'] as MainView[]
+    },
+    { 
+      id: 'SIGINT_SUITE',
+      name: 'SIGINT Suite',
+      icon: Radio,
+      tagline: 'Carrier interception, quantum decryptor, packet sniffer & spectrum canary',
+      views: ['intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner', 'telemetry_pulse'] as MainView[]
+    },
+    { 
+      id: 'ACTIVE_OPS',
+      name: 'Active Ops',
+      icon: Zap,
+      tagline: 'Electronic warfare, drone swarms, orbital strike, kill chain & botnets',
+      views: ['tactical_suite', 'warfare', 'planner', 'neural', 'orbital_strike', 'drone_swarm', 'kill_chain', 'cyber_attack', 'signal_jamming', 'botnet_command', 'script_env', 'remote_access'] as MainView[]
+    },
+    { 
+      id: 'CYBER_CMD',
+      name: 'Cyber CMD',
+      icon: Shield,
+      tagline: 'Quantum defense, Aegis C2, Grover brute visualizer & Sentinel telemetry',
+      views: ['defense', 'simulation', 'aegis', 'usb_manager', 'vsat_config', 'grover', 'sentinel'] as MainView[]
+    },
+    { 
+      id: 'AUX_DATA',
+      name: 'Aux Intelligence',
+      icon: Layers,
+      tagline: 'Scientific link budget, terrain path clearance, intel RSS & infrastructure',
+      views: ['media', 'live', 'calculations', 'terrain', 'news', 'infrastructure'] as MainView[]
+    }
+  ], []);
+
+  const [activeCategory, setActiveCategory] = useState<string>('TACTICAL_BASE');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Keep category tab in sync with active view
+  useEffect(() => {
+    const matching = VIEW_CATEGORIES.find(c => c.views.includes(view));
+    if (matching && matching.id !== activeCategory) {
+      setActiveCategory(matching.id);
+    }
+  }, [view, VIEW_CATEGORIES]);
+
+  const currentCategoryObj = useMemo(() => {
+    return VIEW_CATEGORIES.find(c => c.id === activeCategory) || VIEW_CATEGORIES[0];
+  }, [VIEW_CATEGORIES, activeCategory]);
+
+  const allViewsList = useMemo(() => {
+    return VIEW_CATEGORIES.flatMap(c => c.views.map(v => ({ view: v, category: c.id })));
+  }, [VIEW_CATEGORIES]);
+
+  const filteredViews = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return currentCategoryObj.views;
+    }
+    const q = searchQuery.toLowerCase().trim();
+    return allViewsList
+      .filter(item => item.view.toLowerCase().includes(q))
+      .map(item => item.view);
+  }, [searchQuery, currentCategoryObj, allViewsList]);
 
   return (
     <div className={`crt-screen min-h-screen ${(!isStealthMode && (isJamming || defcon === 1)) ? 'crt-distorted' : ''}`}>
@@ -229,134 +295,248 @@ export const App: React.FC = () => {
         </div>
       )}
       <Layout isStealthMode={isStealthMode} setIsStealthMode={setIsStealthMode}>
-        <div className="flex flex-col space-y-8 max-w-7xl mx-auto pb-12 transition-all duration-1000">
+        <div className="flex flex-col space-y-6 max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 pb-12 transition-all duration-500">
           
-          <div className={`flex flex-col xl:flex-row items-stretch justify-between gap-6 glass p-6 rounded-[32px] border-2 border-slate-800 shadow-[0_32px_64px_rgba(0,0,0,0.6)] relative overflow-hidden group ${defcon === 1 || isJamming ? 'defcon-alert' : ''}`}>
-             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <span className="text-[60px] font-black text-white italic tracking-tighter uppercase whitespace-nowrap overflow-hidden">TSI_TACTICAL_BRIDGE</span>
-             </div>
-             <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
-             
-             <div className="flex flex-row items-stretch gap-8 z-20 w-full">
-              <div className="flex flex-col w-full">
-                <div className="flex items-center justify-between mb-6 border-b border-slate-800 pb-3 px-2">
-                   <div className="flex items-center space-x-4">
-                      <div className="flex space-x-1">
-                         {[1,2,3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-cyan-500/40"></div>)}
-                      </div>
-                      <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">BRIDGE_CONTROL_INTERFACE_V5.4</span>
-                   </div>
-                   <div className="flex items-center space-x-4">
-                      <button 
-                        onClick={() => {
-                          const nextStealth = !isStealthMode;
-                           setIsStealthMode(nextStealth);
-                           addMissionLog(nextStealth ? "STEALTH_MODE_ENGAGED: MASKING ALL TELEMETRY TRANSMISSIONS" : "STEALTH_MODE_DISENGAGED: RESUMING NORMAL OPERATION", "warning");
-                        }}
-                        className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1 rounded-lg border transition-all duration-300 flex items-center space-x-2 ${
-                           isStealthMode 
-                             ? 'bg-purple-950/80 border-purple-500 text-purple-400 font-bold shadow-[0_0_10px_rgba(168,85,247,0.3)] animate-pulse'
-                             : 'bg-slate-900 hover:bg-slate-800 border-slate-850 text-slate-400 hover:text-cyan-400'
-                        }`}
-                        title="Toggle Stealth Mode"
-                      >
-                         <span className={`w-1.5 h-1.5 rounded-full ${isStealthMode ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'bg-slate-500'}`}></span>
-                         <span>STEALTH: {isStealthMode ? "ACTIVE" : "OFFLINE"}</span>
-                      </button>
-                      <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest bg-slate-900 px-2 py-1 rounded border border-slate-800">UPLINK: {isStealthMode ? "MASKED" : "ACTIVE"}</span>
-                      <span className="text-[9px] font-mono text-slate-400 font-bold tracking-widest">{new Date().toISOString()}</span>
-                   </div>
+          {/* Tactical Command Bridge Header */}
+          <div className={`glass p-5 lg:p-6 rounded-[28px] border-2 border-slate-800 shadow-[0_24px_50px_rgba(0,0,0,0.6)] relative overflow-hidden group transition-all ${defcon === 1 || isJamming ? 'defcon-alert' : ''}`}>
+            {/* Top Command Line */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+              {/* Left Branding */}
+              <div className="flex items-center space-x-3.5">
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                    <Crosshair className="w-5 h-5 animate-spin" style={{ animationDuration: '16s' }} />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-950 animate-pulse"></div>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-                  {VIEW_CATEGORIES.map(cat => (
-                    <div key={cat.name} className="space-y-4">
-                       <div className="flex items-center justify-between mx-1">
-                          <span className={`text-[9px] font-black uppercase tracking-[0.2em] flex flex-wrap items-center gap-1.5 ${isStealthMode ? 'text-red-500/80' : 'text-slate-500'}`}>
-                            <span>{cat.name}</span>
-                            {isStealthMode && (
-                              <span className="text-[7px] text-red-550 font-mono animate-pulse tracking-normal uppercase bg-red-950/25 px-1 rounded border border-red-900/40">
-                                EMERGENCY_WARNING
-                              </span>
-                            )}
-                          </span>
-                          <div className={`w-8 h-[1px] ${isStealthMode ? 'bg-red-950/60' : 'bg-slate-800'}`}></div>
-                       </div>
-                       <div className="flex flex-wrap gap-2 p-1">
-                          {cat.views.map((v) => (
-                            <button
-                              key={v}
-                              onClick={() => setView(v as MainView)}
-                              className={`px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 border-2 ${
-                                view === v 
-                                  ? isStealthMode
-                                    ? 'bg-red-950/80 border-red-500 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.35)] scale-105 z-10'
-                                    : 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-[0_0_25px_rgba(34,211,238,0.3)] scale-105 z-10' 
-                                  : isStealthMode
-                                    ? 'text-red-700/60 border-red-950/25 hover:border-red-500/40 hover:text-red-400 hover:bg-red-950/30 active:scale-95'
-                                    : 'text-slate-500 border-slate-900/50 hover:border-slate-700 hover:text-cyan-400 hover:bg-slate-900/80 active:scale-95'
-                              }`}
-                            >
-                               {v.replace('_', ' ')}
-                            </button>
-                          ))}
-                       </div>
-                    </div>
-                  ))}
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-black uppercase tracking-[0.25em] text-cyan-400 font-mono">SATEXPERT-313</span>
+                    <span className="text-[9px] font-mono bg-cyan-950/60 text-cyan-300 border border-cyan-800/60 px-1.5 py-0.5 rounded">TSI C2 v5.4</span>
+                    <span className="text-[9px] font-mono text-emerald-400 hidden sm:inline-flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      <span>NIST PQC ACTIVE</span>
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-mono tracking-wide">
+                    Tactical Satellite Communications Intelligence & Cyber-Kinetic Operations Platform
+                  </p>
                 </div>
               </div>
-              
-              <div className={`w-px hidden xl:block self-stretch mx-2 ${isStealthMode ? 'bg-red-950/40' : 'bg-slate-800/60'}`}></div>
 
-              <div className="flex flex-col justify-center min-w-[120px]">
-                <div className="flex items-center space-x-2 mb-4 px-1">
-                   <ShieldCheck className={`w-4 h-4 ${isStealthMode ? 'text-red-500/85 animate-pulse' : 'text-slate-600'}`} />
-                   <div className="flex flex-col">
-                     <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isStealthMode ? 'text-red-500/85' : 'text-slate-500'}`}>
-                       Defcon
-                     </span>
-                     {isStealthMode && (
-                       <span className="text-[6.5px] font-mono tracking-tighter text-red-500/80 font-black animate-pulse leading-none uppercase">
-                         EMERGENCY_WARNING
-                       </span>
-                     )}
-                   </div>
-                </div>
-                <div className={`flex flex-col space-y-1.5 p-2 rounded-2xl border ${
-                  isStealthMode 
-                    ? 'bg-slate-950 border-red-950/65 shadow-[inset_0_0_12px_rgba(239,68,68,0.05)]' 
-                    : 'bg-slate-950/40 border-slate-800/30'
-                }`}>
-                  {[1, 2, 3, 4, 5].map(lvl => (
-                    <button 
-                      key={lvl} 
-                      onClick={() => setDefcon(lvl)} 
-                      className={`h-8 rounded-xl flex items-center px-4 space-x-3 text-[10px] font-black transition-all border ${
-                        defcon === lvl 
-                          ? isStealthMode
-                            ? 'bg-red-950/80 border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.35)]'
-                            : (lvl <= 2 ? 'bg-red-500 text-white border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40') 
-                          : isStealthMode
-                            ? 'bg-slate-900/30 border-red-950/15 text-red-900/40 hover:border-red-900/40 hover:text-red-400 hover:bg-red-955/10'
-                            : 'bg-slate-900/60 border-slate-800/40 text-slate-600 hover:border-slate-700'
+              {/* Right Controls Dock: DEFCON, Stealth, Jammer, Stats */}
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-start md:justify-end">
+                {/* DEFCON Selector */}
+                <div className="flex items-center space-x-1 bg-slate-950/90 border border-slate-800 p-1 rounded-xl shadow-inner">
+                  <span className="text-[8.5px] font-mono font-bold text-slate-400 px-2 uppercase tracking-wider hidden sm:inline">DEFCON</span>
+                  {[5, 4, 3, 2, 1].map(lvl => (
+                    <button
+                      key={lvl}
+                      onClick={() => setDefcon(lvl)}
+                      title={`Readiness: DEFCON ${lvl}`}
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-black transition-all ${
+                        defcon === lvl
+                          ? lvl === 1
+                            ? 'bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.8)] animate-pulse'
+                            : lvl === 2
+                            ? 'bg-amber-500 text-slate-950 shadow-[0_0_10px_rgba(245,158,11,0.6)]'
+                            : lvl === 3
+                            ? 'bg-yellow-400 text-slate-950'
+                            : 'bg-cyan-500 text-slate-950 shadow-[0_0_10px_rgba(34,211,238,0.5)]'
+                          : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900'
                       }`}
                     >
-                      <span className="w-4">{lvl}</span>
-                      <div className={`h-1 flex-grow rounded-full ${
-                        defcon === lvl 
-                          ? isStealthMode 
-                            ? 'bg-red-400' 
-                            : (lvl <= 2 ? 'bg-white' : 'bg-cyan-400') 
-                          : 'bg-slate-800'
-                      }`}></div>
+                      {lvl}
                     </button>
                   ))}
                 </div>
+
+                {/* Stealth Toggle */}
+                <button 
+                  onClick={() => {
+                    const nextStealth = !isStealthMode;
+                    setIsStealthMode(nextStealth);
+                    addMissionLog(nextStealth ? "STEALTH_MODE_ENGAGED: MASKING ALL TELEMETRY TRANSMISSIONS" : "STEALTH_MODE_DISENGAGED: RESUMING NORMAL OPERATION", "warning");
+                  }}
+                  className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-xl border transition-all duration-300 flex items-center space-x-2 ${
+                    isStealthMode 
+                      ? 'bg-purple-950/90 border-purple-500 text-purple-300 font-bold shadow-[0_0_12px_rgba(168,85,247,0.4)] animate-pulse'
+                      : 'bg-slate-900/80 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-cyan-400'
+                  }`}
+                  title="Toggle Stealth Mode"
+                >
+                  <span className={`w-2 h-2 rounded-full ${isStealthMode ? 'bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.9)]' : 'bg-slate-600'}`}></span>
+                  <span>STEALTH: {isStealthMode ? "ACTIVE" : "OFFLINE"}</span>
+                </button>
+
+                {/* Jammer Quick Toggle */}
+                <button
+                  onClick={() => {
+                    const nextJamming = !isJamming;
+                    setIsJamming(nextJamming);
+                    addMissionLog(nextJamming ? `JAMMER_ACTIVATED: ELECTRONIC COUNTERMEASURES SWEEP AT ${jammingPower}% POWER` : "JAMMER_STANDBY: RF SPECTRUM QUIET", nextJamming ? "CRITICAL" : "INFO");
+                  }}
+                  className={`text-[9px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-xl border transition-all ${
+                    isJamming
+                      ? 'bg-red-950/90 border-red-500 text-red-300 font-black shadow-[0_0_12px_rgba(239,68,68,0.5)] animate-pulse'
+                      : 'bg-slate-900/80 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-red-400'
+                  }`}
+                  title="Toggle RF Jammer"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 inline mr-1 text-red-500" />
+                  <span>JAMMER: {isJamming ? `${jammingPower}%` : "OFF"}</span>
+                </button>
+
+                {/* Tactical Report PDF Generator Button */}
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="text-[9px] font-mono uppercase tracking-widest px-3 py-1.5 rounded-xl border border-cyan-500/50 bg-cyan-950/70 hover:bg-cyan-900/90 text-cyan-300 font-bold shadow-[0_0_12px_rgba(6,182,212,0.3)] hover:shadow-[0_0_18px_rgba(6,182,212,0.5)] transition-all flex items-center space-x-1.5 group"
+                  title="Generate & Export Printable Tactical PDF Report"
+                >
+                  <FileText className="w-3.5 h-3.5 text-cyan-400 group-hover:animate-bounce" />
+                  <span>TACTICAL REPORT (PDF)</span>
+                </button>
+
+                {/* Mini Telemetry Snapshot */}
+                <div className="hidden xl:flex items-center space-x-2.5 bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-xl text-[9px] font-mono">
+                  <span className="text-slate-500">SNR: <strong className={Number(telemetry.snr) < 5 ? 'text-red-400 animate-pulse' : 'text-cyan-400'}>{telemetry.snr} dB</strong></span>
+                  <span className="text-slate-700">·</span>
+                  <span className="text-slate-500">PWR: <strong className="text-slate-300">{telemetry.rxPower} dBW</strong></span>
+                  <span className="text-slate-700">·</span>
+                  <span className="text-slate-500">LOSS: <strong className="text-slate-300">{telemetry.packetLoss}%</strong></span>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center justify-center xl:justify-end flex-grow z-20 xl:min-w-[300px]">
-               <TelemetryPulse telemetry={telemetry} isStealthMode={isStealthMode} />
+
+            {/* Middle: 5 Category Tabs + Module Filter Search */}
+            <div className="pt-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+              {/* Category Tabs */}
+              <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-950/90 border border-slate-850 rounded-2xl">
+                {VIEW_CATEGORIES.map(cat => {
+                  const Icon = cat.icon;
+                  const isActive = activeCategory === cat.id && !searchQuery.trim();
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setActiveCategory(cat.id);
+                        setSearchQuery('');
+                      }}
+                      className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 border ${
+                        isActive
+                          ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.35)]'
+                          : 'text-slate-400 border-transparent hover:text-cyan-300 hover:bg-slate-900/80'
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-slate-500'}`} />
+                      <span>{cat.name}</span>
+                      <span className={`text-[8px] font-mono px-1.5 py-0.2 rounded-md ${
+                        isActive ? 'bg-slate-950/20 text-slate-950 font-bold' : 'bg-slate-900 text-slate-500'
+                      }`}>
+                        {cat.views.length}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Search Input for 43+ modules */}
+              <div className="relative min-w-[260px] max-w-md">
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search all 43 modules (e.g. quantum, warfare, strike)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-950/90 text-xs font-mono pl-9 pr-8 py-2 border border-slate-800 rounded-xl text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Category Tagline & Modules Ribbon */}
+            <div className="pt-3.5">
+              <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 mb-2 px-1">
+                <span>
+                  {searchQuery.trim()
+                    ? `FILTERED MODULES (${filteredViews.length} found)`
+                    : `${currentCategoryObj.tagline.toUpperCase()}`
+                  }
+                </span>
+                <span className="text-slate-600 hidden sm:inline">CLICK TO ENGAGE INTERFACE</span>
+              </div>
+
+              {/* Modules Buttons Bar */}
+              <div className="flex flex-wrap gap-2 p-1 max-h-[160px] overflow-y-auto scrollbar-thin">
+                {filteredViews.length === 0 ? (
+                  <div className="text-xs font-mono text-slate-600 py-2 px-3">
+                    No tactical modules match "{searchQuery}". Clear query to view category modules.
+                  </div>
+                ) : (
+                  filteredViews.map((v) => {
+                    const isSelected = view === v;
+                    return (
+                      <button
+                        key={v}
+                        onClick={() => setView(v as MainView)}
+                        className={`px-3 py-1.5 rounded-xl text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 border ${
+                          isSelected
+                            ? isStealthMode
+                              ? 'bg-purple-950 border-purple-500 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105'
+                              : 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)] scale-105 font-black'
+                            : 'text-slate-400 border-slate-900 bg-slate-950/60 hover:border-slate-700 hover:text-cyan-300 hover:bg-slate-900 active:scale-95'
+                        }`}
+                      >
+                        {v.replace(/_/g, ' ')}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Operational View Header & Telemetry Breadcrumb */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/80 border border-slate-800/80 px-4 py-2.5 rounded-2xl shadow-sm">
+            <div className="flex items-center space-x-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+              <div className="flex items-center space-x-2 font-mono text-xs">
+                <span className="text-slate-400 font-bold uppercase tracking-wider">{currentCategoryObj.name}</span>
+                <span className="text-slate-600">/</span>
+                <span className="text-cyan-400 font-black uppercase tracking-wider">{view.replace(/_/g, ' ')}</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 text-[10px] font-mono text-slate-400">
+              <span className="hidden sm:inline">SAT: <strong className="text-slate-200">{selectedSat.name}</strong> ({selectedSat.orbitalSlot})</span>
+              <span className="text-slate-700 hidden sm:inline">|</span>
+              <span>EL: <strong className="text-slate-200">{lookAngles ? `${lookAngles.elevation}°` : '--'}</strong></span>
+              <span className="text-slate-700">|</span>
+              <span>AZ: <strong className="text-slate-200">{lookAngles ? `${lookAngles.azimuth}°` : '--'}</strong></span>
+              <span className="text-slate-700">|</span>
+              <span>LINK: <strong className={telemetry.status === 'NOMINAL' ? 'text-emerald-400' : 'text-amber-400'}>{telemetry.status}</strong></span>
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="ml-2 text-[9px] uppercase font-mono px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500 hover:text-slate-950 transition-colors flex items-center space-x-1"
+                title="Export Tactical Report as PDF"
+              >
+                <FileText className="w-2.5 h-2.5 text-cyan-400" />
+                <span>Export PDF</span>
+              </button>
+              {view !== 'tactical' && (
+                <button
+                  onClick={() => setView('tactical')}
+                  className="ml-2 text-[9px] uppercase font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 transition-colors"
+                >
+                  Return to Base
+                </button>
+              )}
             </div>
           </div>
 
@@ -390,16 +570,39 @@ export const App: React.FC = () => {
                     hasNewLogs={hasNewLogs}
                     setHasNewLogs={setHasNewLogs}
                   />
-                  <TacticalMap userLoc={userLoc} satellite={selectedSat} isTracking={isTracking} isStealthMode={isStealthMode} onLocChange={setUserLoc} />
+                  <TacticalMap 
+                    userLoc={userLoc} 
+                    satellite={selectedSat} 
+                    isTracking={isTracking} 
+                    isStealthMode={isStealthMode} 
+                    onLocChange={setUserLoc} 
+                    telemetry={telemetry}
+                    isJamming={isJamming}
+                    jammingPower={jammingPower}
+                    weather={weather}
+                  />
                   <div className="grid grid-cols-1 gap-6">
                     <WeatherDashboard weather={weather} loc={userLoc} satName={selectedSat.name} />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
-                      <SitrepBoard selectedSatellite={selectedSat} defcon={defcon} />
+                      <SitrepBoard 
+                        selectedSatellite={selectedSat} 
+                        defcon={defcon} 
+                        onOpenReport={() => setIsReportModalOpen(true)}
+                      />
                       <QuantumEntropy />
                     </div>
                   </div>
                   {lookAngles && <LookAngleCard angles={lookAngles} satellite={selectedSat} />}
-                  <SignalVisualizer quality={lookAngles?.elevation && lookAngles.elevation > 0 ? 85 : 0} isJamming={isJamming} jammingPower={jammingPower} rainFade={weather === 'CLEAR' ? 0.5 : 5.0} isStealthMode={isStealthMode} snr={telemetry.snr} />
+                  <SignalVisualizer 
+                    quality={lookAngles?.elevation && lookAngles.elevation > 0 ? 85 : 0} 
+                    isJamming={isJamming} 
+                    jammingPower={jammingPower} 
+                    rainFade={weather === 'CLEAR' ? 0.5 : 5.0} 
+                    isStealthMode={isStealthMode} 
+                    snr={telemetry.snr}
+                    packetLoss={telemetry.packetLoss}
+                    satelliteName={selectedSat.name}
+                  />
                 </div>
                 <div className="lg:col-span-7 xl:col-span-8">
                   <AITechnician 
@@ -573,6 +776,10 @@ export const App: React.FC = () => {
             {view === 'radio_intercept' && (
               <RadioInterceptSuite addMissionLog={addMissionLog} />
             )}
+
+            {view === 'telemetry_pulse' && (
+              <TelemetryPulse telemetry={telemetry} isStealthMode={isStealthMode} />
+            )}
             
             {view === 'quantum_decryptor' && (
               <QuantumDecryptor addMissionLog={addMissionLog} />
@@ -660,6 +867,24 @@ export const App: React.FC = () => {
           </div>
         </div>
       </Layout>
+
+      {/* Tactical Report PDF Modal */}
+      <TacticalReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        defcon={defcon}
+        isStealthMode={isStealthMode}
+        isJamming={isJamming}
+        jammingPower={jammingPower}
+        weather={weather}
+        stationCoordinates={userLoc}
+        selectedSatellite={selectedSat}
+        lookAngles={lookAngles}
+        telemetry={telemetry}
+        activeView={view}
+        eventLogs={eventLogs}
+        onMissionLog={addMissionLog}
+      />
     </div>
   );
 };
