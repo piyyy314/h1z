@@ -171,6 +171,70 @@ ${isStealthMode
 2. ${isDecoyActive ? 'Decoy Transmitter is operational' : 'Engage Decoy transmitter to blend your signature into ambient spectral noise.'}`;
     }
 
+    if (q.includes('osint') || q.includes('telegram') || q.includes('c4isr') || q.includes('reconnaissance')) {
+      return `### CYBERSEC / C4ISR SIGINT RECONNAISSANCE DIRECTIVE
+[UNIT: SAT-TECH-9000 // TACTICAL NODE DISPATCH]
+
+**RECOMMENDED ACTION 1: ROUTING TO C4ISR SIGINT TERMINAL NODE**
+- **Action**: Request successfully routed to **CYBERSEC / C4ISR SIGINT Terminal Node** (SIGINT Suite -> \`c4isr_terminal\`).
+- **Live Intercepts**: Active encrypted Telegram tactical feed monitoring (@Frontline_C4ISR, @SatCom_CyberWatch, @ME_Chokepoints_Intel).
+- **Target Extraction**: Real-time geolocation coordinates extracted and ready for direct plotting onto the Tactical Heatmap.
+- **Counter-Intelligence**: Automated MGRS and RF carrier beacon matching active.`;
+    }
+
+    if (q.includes('telstar') || q.includes('uplink') || q.includes('dvb-s2x') || q.includes('carrier allocation') || q.includes('routing')) {
+      return `### SATELLITE UPLINK ROUTING & TRANSPORT PARAMETERS: TELSTAR 11N (37.5°W)
+[UNIT: SAT-TECH-9000 // RF TRANSPORT ENGINE]
+
+**RECOMMENDED ACTION 2: TELSTAR 11N DVB-S2X TRANSPORT ALLOCATION**
+- **Satellite Locked**: Telstar 11N (Orbital Slot: 37.5°W // Longitude: -37.5°)
+- **Carrier Allocation**: Transponder Ku-T11N-XP24 (Uplink: 14285.50 MHz, Downlink: 11485.50 MHz, BW: 36.0 MHz, Linear Horizontal)
+- **DVB-S2X Parameters**: MODCOD 16APSK 3/4-L, Roll-off factor α = 0.05 (Nyquist +5%), Pilots ON, FEC: 3/4 LDPC+BCH
+- **Symbol Rate Adjustment**: Nominal 27.500 Msps (tunable 1.2 to 34.0 Msps, 78.38 Mbps throughput at 2.71 bps/Hz)
+- **Polarization Skew Calibration**: Dynamically aligned to feedhorn offset for station coords (Cross-Pol Isolation: 33.5 dB)
+- **IP Transport / GSE**: Generic Stream Encapsulation, Multicast route 239.255.42.11/32, Teleport Gateway 192.168.11.1, MTU 1500 (DSCP EF-46)`;
+    }
+
+    if (
+      (q.includes('hormuz') || q.includes('ship') || q.includes('maritime') || q.includes('middle east') || q.includes('mideast')) &&
+      (q.includes('fire') || q.includes('fires') || q.includes('nasa') || q.includes('live'))
+    ) {
+      return `### NASA FIRMS LIVE THERMAL DOSSIER: STRAIT OF HORMUZ MARITIME & MIDDLE EAST LAND FIRES
+[UNIT: SAT-TECH-9000 // ORBITAL INFRARED DOWNLINK STATUS: ALWAYS ACTIVE]
+
+**1. STRAIT OF HORMUZ MARITIME SHIP FIRES (8 ACTIVE VESSELS TRACKED BY NOAA-20 / SUOMI-NPP VIIRS 375m):**
+- **VLCC Front Empress** (Marshall Islands // MMSI 636019482) - Lat 26.38°N, Lng 56.62°E | FRP: **460 MW** (492 K) | Inbound TSS Channel
+- **Chemical Tanker Stolt Valor** (Bahamas // MMSI 311000842) - Lat 26.22°N, Lng 56.45°E | FRP: **310 MW** (448 K) | Musandam Chokepoint
+- **IRGC Fast Attack Craft 09** (Iran // MMSI IRN-9021) - Lat 26.86°N, Lng 56.38°E | FRP: **520 MW** (515 K) | Larak Island North Channel
+- **Suezmax Pacific Apex** (Marshall Islands // MMSI 538008123) - Lat 25.28°N, Lng 56.68°E | FRP: **380 MW** (462 K) | Fujairah Anchorage Exit
+- **Container Al-Mirqab** (UAE // MMSI 470982000) - Lat 26.25°N, Lng 55.28°E | FRP: **290 MW** (435 K) | Greater Tunb Western Approaches
+- **Darya Bunkering Barge 4** (Iran // MMSI IRN-4421) - Lat 26.65°N, Lng 55.88°E | FRP: **410 MW** (475 K) | Qeshm South Entrance
+- **LNG Carrier Al-Ghashamiya** (Marshall Islands // MMSI 538003421) - Lat 26.15°N, Lng 56.12°E | FRP: **510 MW** (504 K) | Cryogenic Boil-Off Flare
+- **Suezmax Delta Poseidon** (Greece // MMSI 240889000) - Lat 25.82°N, Lng 57.08°E | FRP: **430 MW** (472 K) | Jask Approach Cargo Pump Fire
+
+**2. MIDDLE EAST TERRESTRIAL LAND FIRES (24 MAJOR FACILITIES MONITORED BY VIIRS & MODIS):**
+- **Iran**: Kharg Island Petrochemical Flare (740 MW), Ahvaz-3 Oilfield Flare (680 MW), South Pars Asaluyeh Mega-Flare (890 MW), Bandar Abbas Refinery Flare (620 MW)
+- **Iraq**: Rumaila Supergiant Flare (820 MW), Zubair Degassing Flare (580 MW), Kirkuk Baba Gurgur (710 MW), Baiji Refinery Flare (540 MW), Majnoon Station 1 (720 MW)
+- **Syria & Lebanon**: Deir ez-Zor Al-Omar Field (610 MW), Palmyra Gas Flare (490 MW), South Lebanon Litani Combat Hotspot (440 MW)
+- **Arabian Peninsula & Gulf**: Kuwait Burgan Field (790 MW), Saudi Arabia Abqaiq GOSP-1 (850 MW), Saudi Shaybah Field (670 MW), Saudi Ras Tanura Terminal (860 MW), Qatar Ras Laffan LNG Complex (810 MW), Bahrain Sitrah BAPCO Wharf (520 MW), UAE Habshan Gas Complex (580 MW), Oman Fahud Field (430 MW)
+- **Red Sea & Levant Corridor**: Yemen Marib Safer Depot (530 MW), Yemen Hodeidah Ras Isa (490 MW), Egypt Ras Gharib Suez Flare (490 MW), Jordan Zarqa Refinery (380 MW)
+
+**3. TACTICAL MAP ACTIONS:**
+- The Tactical Map is permanently locked to **ALWAYS ACTIVE: HORMUZ SHIPS + MIDEAST LAND FIRES**.
+- Click **MIDEAST THEATER (6.2x)** or **HORMUZ CHOKEPOINT (20x)** in the Tactical Map to view individual ship hulls, nautical diamond markers, MMSI callouts, and plume radii!`;
+    }
+
+    if (q.includes('fire') || q.includes('fires') || q.includes('heatmap') || q.includes('malware') || q.includes('c2')) {
+      return `### GEOSPATIAL HEATMAP: THERMAL FIRES & MALWARE/C2 CORRELATION
+[UNIT: SAT-TECH-9000 // SATELLITE SENSOR FUSION]
+
+**HEATMAP LAYER STATUS: SYNCHRONIZED**
+- **Strait of Hormuz Maritime Ships**: 8 active vessels with thermal anomalies (Front Empress 460 MW, Stolt Valor 310 MW, IRGC FAC 520 MW, Al-Ghashamiya LNG 510 MW).
+- **Middle East Land Fires**: 24 terrestrial oilfield, refinery, and combat fire detections (South Pars 890 MW, Ras Tanura 860 MW, Abqaiq 850 MW, Rumaila 820 MW).
+- **Malware & C2 Infrastructure**: 8 active cyber threat beacons mapped (Cobalt Strike 185.196.220.44:443, AcidRain VSAT Wiper 91.240.118.172:8080, QakBot 198.51.100.89:2222, Sandworm 194.87.144.11:9001).
+- **Tactical Map**: Configured to ALWAYS show all maritime ship fires in Strait of Hormuz and all Middle East land fires with Theater Zoom presets.`;
+    }
+
     // Default general-purpose fallback response if no keyword matched
     return `### DETECTED CONTEXT & TELEMETRY LOGS
 [UNIT: SAT-TECH-9000 // OFFLINE SYSTEM PROCESSOR]

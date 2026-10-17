@@ -5,7 +5,7 @@
 ### *Enterprise Military-Grade Satellite Communications & Cyber-Kinetic Operations Platform*
 
 [![CI Build](https://img.shields.io/badge/CI_Build-Passing-059669?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/)
-[![Tests Passing](https://img.shields.io/badge/Tests-23%2F23_Passing-10b981?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/)
+[![Tests Passing](https://img.shields.io/badge/Tests-30%2F30_Passing-10b981?style=for-the-badge&logo=vitest&logoColor=white)](https://github.com/)
 [![Security Pass: Grade A+](https://img.shields.io/badge/Security_Pass-Grade_A%2B-059669?style=for-the-badge&logo=shield&logoColor=white)](SECURITY.md)
 [![NIST Post-Quantum Cryptography](https://img.shields.io/badge/NIST_PQC-Dilithium3_%26_Kyber-7c3aed?style=for-the-badge&logo=quantum&logoColor=white)](SECURITY.md)
 [![TypeScript 5.8](https://img.shields.io/badge/TypeScript-5.8_Strict-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -36,7 +36,8 @@
   - [E. Tactical AI Mission Copilot](#e-tactical-ai-mission-copilot)
   - [F. Tactical Report Generation & PDF Mission Export (`jspdf` + `jspdf-autotable`)](#f-tactical-report-generation--pdf-mission-export-jspdf--jspdf-autotable)
   - [G. Real-Time Strategic Overlay & Tactical Threat Radar](#g-real-time-strategic-overlay--tactical-threat-radar)
-- [3. Complete Catalog of 44 Tactical Modules](#3-complete-catalog-of-44-tactical-modules)
+  - [H. C4ISR SIGINT Terminal Node & Geospatial Heatmap](#h-c4isr-sigint-terminal-node--geospatial-heatmap)
+- [3. Complete Catalog of 45 Tactical Modules](#3-complete-catalog-of-45-tactical-modules)
 - [4. Mathematical & RF Engineering Formulations](#4-mathematical--rf-engineering-formulations)
 - [5. System Architecture & Tech Stack](#5-system-architecture--tech-stack)
 - [6. Local Development & Installation](#6-local-development--installation)
@@ -102,9 +103,19 @@ Given any observer's latitude and longitude, the orbital positioning engine comp
 - **Proximity & Breach Threat Evaluation**: Great-Circle Haversine distance computations from operator position to all threat perimeters; automated flashing HUD alert banners when the station is breached or within proximity vectors (<800 km).
 - **Interactive Zone Inspector**: Click-to-inspect tactical dossiers revealing altitude ceilings, frequency bands, estimated telemetry degradation, and recommended countermeasures (e.g. adaptive null-steering, MODCOD reduction, or neural filtering).
 
+### H. C4ISR SIGINT Terminal Node & Geospatial Heatmap
+- **OSINT & Telegram Reconnaissance Console**: Real-time intercept feed tracking military tactical channels (`@Frontline_C4ISR`, `@SatCom_CyberWatch`, `@ME_Chokepoints_Intel`, `@Orbital_FIRMS_Feed`), automated threat extraction, keyword filtering, and 1-click target dispatch to the Tactical Heatmap.
+- **Telstar 11N Satellite Uplink Transport Routing**: Complete RF/IP transport parameter configuration for Telstar 11N (37.5°W): transponder allocation Ku-T11N-XP24 (14285.50 MHz Uplink / 11485.50 MHz Downlink, BW: 36.0 MHz, Linear Horizontal), DVB-S2X MODCOD (16APSK 3/4-L, roll-off $\alpha=0.05$, Pilots ON, FEC: 3/4 LDPC+BCH), tunable symbol rate (1.2 to 45.0 Msps, 78.38 Mbps throughput), polarization skew calibration with feedhorn mechanical rotation offset and cross-pol isolation $\ge 33.5\text{ dB}$, and multicast GSE encapsulation over `239.255.42.11/32`.
+- **Always-Active NASA FIRMS Live Thermal Detections (Strait of Hormuz Ships & All Middle East Land Fires)**:
+  - **Strait of Hormuz Maritime Ships in Flame (8 Vessels)**: Continuous 24/7 monitoring of shipboard thermal incidents, engine room explosions, container fires, and cargo pump room flash fires across key transit lanes (Traffic Separation Scheme inbound/outbound, Musandam Chokepoint, Larak Island, Greater Tunb, Qeshm channel, and Fujairah anchorage), tracking VLCC Front Empress, Chemical Tanker Stolt Valor, IRGC Fast Attack Craft 09, Suezmax Pacific Apex, Container Al-Mirqab, Darya Bunkering Barge, LNG Carrier Al-Ghashamiya (boil-off vent flare), and Suezmax Delta Poseidon, with active MMSI callouts, vessel class, and emergency VSAT telemetry.
+  - **Middle East Terrestrial Land Fires (24 Facilities)**: Exhaustive active fire tracking across all Middle Eastern sovereign territories: Iran (Kharg Island, Ahvaz-3, South Pars Asaluyeh, Bandar Abbas), Iraq (Rumaila, Zubair, Kirkuk Baba Gurgur, Baiji, Majnoon Station 1), Syria & Lebanon (Deir ez-Zor Al-Omar, Palmyra, South Lebanon Litani combat hotspot), Arabian Peninsula (Kuwait Burgan, Saudi Abqaiq GOSP-1, Saudi Shaybah, Saudi Ras Tanura Marine Terminal, Qatar Ras Laffan LNG Complex, Bahrain Sitrah BAPCO Wharf, UAE Habshan Gas Complex, Oman Fahud), and Red Sea / Levant (Yemen Marib Safer, Yemen Hodeidah Ras Isa, Egypt Ras Gharib Suez, Jordan Zarqa).
+  - **Theater Zoom Engine**: High-performance SVG multi-resolution theater mode supporting Planetary Orbit (`GLOBAL 1.0x`), Middle East Regional Theater (`MIDEAST THEATER 6.25x`), and direct chokepoint lock (`HORMUZ CHOKEPOINT 20x`), with dynamically scaled icons, nautical diamond hulls, and thermal emission plumes.
+  - **NASA FIRMS Live Dossier Modal**: Comprehensive slide-out orbital telemetry intelligence console displaying real-time pass schedules for NOAA-20 (JPSS-1), NOAA-21 (JPSS-2), Suomi NPP, NASA Terra MODIS, NASA Aqua MODIS, and Sentinel-3 SLSTR, combined with full-text search across all 32 regional thermal points.
+- **Cyber Threat Infrastructure (Malware & C2)**: Real-time mapping of active Command & Control servers, AcidRain VSAT wipers, Cobalt Strike malleable listeners, and botnet proxies.
+
 ---
 
-## 3. Complete Catalog of 44 Tactical Modules
+## 3. Complete Catalog of 45 Tactical Modules
 
 SatExpert TSI's modules are organized into 5 operational domains:
 
@@ -113,7 +124,7 @@ SatExpert TSI's modules are organized into 5 operational domains:
 │                   SATEXPERT TSI MISSION CONTROL C2                     │
 ├───────────────┬───────────────┬───────────────┬──────────────┬─────────┤
 │ TACTICAL BASE │ SIGINT SUITE  │  ACTIVE OPS   │  CYBER CMD   │ AUX DATA│
-│   (6 Views)   │  (14 Views)   │  (12 Views)   │  (7 Views)   │ (6 Views│
+│   (6 Views)   │  (15 Views)   │  (12 Views)   │  (7 Views)   │ (6 Views│
 └───────────────┴───────────────┴───────────────┴──────────────┴─────────┘
 ```
 
@@ -125,7 +136,8 @@ SatExpert TSI's modules are organized into 5 operational domains:
 | | `mesh` | **RF Mesh Topology**: Ground-to-satellite relay links, inter-satellite distance & routing |
 | | `weather` | **Atmospheric Weather Radar**: Rain fade attenuation calculator and severe storm Doppler tracking |
 | | `geolocator` | **IP Geolocator**: Ground station geolocation resolver, subnet routing & carrier coordinates |
-| **SIGINT_SUITE** | `intelligence` | **Cyber & SIGINT Suite**: Security assessment tabs, modem hardening, audit tools & stealth keys |
+| **SIGINT_SUITE** | `c4isr_terminal` | **CYBERSEC / C4ISR SIGINT Terminal**: OSINT Telegram reconnaissance, Telstar 11N DVB-S2X transport allocation & heatmap correlation |
+| | `intelligence` | **Cyber & SIGINT Suite**: Security assessment tabs, modem hardening, audit tools & stealth keys |
 | | `interception` | **RF Carrier Interceptor**: Raw binary packet capture, stream decoding & carrier demodulation |
 | | `node_scanner` | **Node Vulnerability Scanner**: Uplink port sweeps, subnet reconnaissance & service probing |
 | | `spoof_tracer` | **Carrier Spoof Tracer**: False beacon detection, Doppler shift delay-lock verification |

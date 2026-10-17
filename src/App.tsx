@@ -15,6 +15,7 @@ import { LinkBudgetCalculator } from './components/LinkBudgetCalculator.tsx';
 import { SignalVisualizer } from './components/SignalVisualizer.tsx';
 import { TacticalHUD } from './components/TacticalHUD.tsx';
 import { TacticalMap } from './components/TacticalMap.tsx';
+import { C4ISRTerminal } from './components/C4ISRTerminal.tsx';
 import { RSSReader } from './components/RSSReader.tsx';
 import { TelemetryPulse } from './components/TelemetryPulse.tsx';
 import { SignalInterceptor } from './components/SignalInterceptor.tsx';
@@ -228,7 +229,7 @@ export const App: React.FC = () => {
       name: 'SIGINT Suite',
       icon: Radio,
       tagline: 'Carrier interception, quantum decryptor, packet sniffer & spectrum canary',
-      views: ['intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner', 'telemetry_pulse'] as MainView[]
+      views: ['c4isr_terminal', 'intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner', 'telemetry_pulse'] as MainView[]
     },
     { 
       id: 'ACTIVE_OPS',
@@ -580,6 +581,8 @@ export const App: React.FC = () => {
                     isJamming={isJamming}
                     jammingPower={jammingPower}
                     weather={weather}
+                    onSelectSatellite={setSelectedSat}
+                    onOpenC4ISR={() => setView('c4isr_terminal')}
                   />
                   <div className="grid grid-cols-1 gap-6">
                     <WeatherDashboard weather={weather} loc={userLoc} satName={selectedSat.name} />
@@ -779,6 +782,17 @@ export const App: React.FC = () => {
 
             {view === 'telemetry_pulse' && (
               <TelemetryPulse telemetry={telemetry} isStealthMode={isStealthMode} />
+            )}
+
+            {view === 'c4isr_terminal' && (
+              <C4ISRTerminal 
+                userLoc={userLoc}
+                selectedSatellite={selectedSat}
+                onSelectSatellite={setSelectedSat}
+                onNavigateToMapWithHeatmap={() => setView('tactical')}
+                addMissionLog={addMissionLog}
+                isStealthMode={isStealthMode}
+              />
             )}
             
             {view === 'quantum_decryptor' && (
