@@ -48,6 +48,15 @@ class TacticalAudioController {
       // Audio autoplay policy fallback
     }
   }
+
+  playAlert() {
+    try {
+      this.playBeep(440, 'sawtooth', 0.18);
+      setTimeout(() => this.playBeep(880, 'sawtooth', 0.24), 100);
+    } catch {
+      // Fallback
+    }
+  }
 }
 
 export const audioController = new TacticalAudioController();

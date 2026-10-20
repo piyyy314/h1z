@@ -61,6 +61,8 @@ import { TacticalScriptEnv } from './components/TacticalScriptEnv.tsx';
 import { RemoteAccessTerminal } from './components/RemoteAccessTerminal.tsx';
 import { Sentinel } from './components/Sentinel.tsx';
 import { Infrastructure } from './components/Infrastructure.tsx';
+import { MaritimeFireMonitor } from './components/MaritimeFireMonitor.tsx';
+import { HormuzFireAlert } from './components/TacticalHUD.tsx';
 import { audioController } from './services/audioService.ts';
 import { calculateLookAngles } from './utils/geoUtils.ts';
 import { Coordinates, Satellite, LookAngles, WeatherCondition, MainView, TacticalEvent } from './types.ts';
@@ -105,6 +107,96 @@ export const App: React.FC = () => {
     };
     setEventLogs(prev => [newEvent, ...prev].slice(0, 50));
     setHasNewLogs(true);
+  }, [selectedSat]);
+
+  // Automated Notification Alert System for Strait of Hormuz Maritime Ship Fires
+  const [hormuzFireAlert, setHormuzFireAlert] = useState<HormuzFireAlert | null>({
+    active: true,
+    vesselName: 'MT Front Altair',
+    vesselType: 'VLCC Crude Tanker',
+    coordinates: '26.34°N, 56.41°E',
+    frp: 640,
+    incidentType: 'Severe Cargo Deck Inferno / Inbound TSS Chokepoint Compromised',
+    timestamp: new Date().toLocaleTimeString([], { hour12: false })
+  });
+
+  const hasTriggeredInitialFireLog = useRef(false);
+  useEffect(() => {
+    // Initial high-priority entry into event log for Strait of Hormuz ship fire detection
+    if (!hasTriggeredInitialFireLog.current) {
+      hasTriggeredInitialFireLog.current = true;
+      const initialAlertLog: TacticalEvent = {
+        id: 'evt-hormuz-fire-' + Math.random().toString(36).substr(2, 7),
+        timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+        satName: selectedSat.name,
+        satId: selectedSat.id,
+        status: 'CRITICAL',
+        detail: '[NASA FIRMS / VIIRS 375m] NEW MARITIME SHIP FIRE DETECTED: MT Front Altair (VLCC Crude Tanker) ablaze at 26.34°N, 56.41°E in Strait of Hormuz Inbound TSS. FRP: 640MW. Flash warning routed to Tactical HUD.'
+      };
+      setEventLogs(prev => {
+        const exists = prev.some(l => l.detail.includes('MT Front Altair'));
+        return exists ? prev : [initialAlertLog, ...prev].slice(0, 50);
+      });
+      setHasNewLogs(true);
+    }
+
+    // Automated periodic satellite surveillance check for maritime ship fires in Strait of Hormuz
+    const fireInterval = setInterval(() => {
+      const candidates = [
+        {
+          name: 'MT Front Altair',
+          type: 'VLCC Crude Tanker',
+          coords: '26.34°N, 56.41°E',
+          frp: 640,
+          incident: 'Cargo Tank Deck Flash Blaze in Inbound TSS Lane'
+        },
+        {
+          name: 'Stolt Valor',
+          type: 'Chemical Tanker',
+          coords: '26.48°N, 56.55°E',
+          frp: 480,
+          incident: 'Manifold Flaring / Chemical Cargo Deck Inferno'
+        },
+        {
+          name: 'Delta Poseidon',
+          type: 'VLCC Crude Tanker',
+          coords: '26.58°N, 56.28°E',
+          frp: 450,
+          incident: 'Pump Room Explosion near Musandam Chokepoint'
+        },
+        {
+          name: 'Al-Ghashamiya',
+          type: 'LNG Carrier',
+          coords: '26.12°N, 56.74°E',
+          frp: 510,
+          incident: 'Cryogenic Methane Boil-Off Flare Out of Control'
+        }
+      ];
+
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+      setHormuzFireAlert({
+        active: true,
+        vesselName: chosen.name,
+        vesselType: chosen.type,
+        coordinates: chosen.coords,
+        frp: chosen.frp,
+        incidentType: chosen.incident,
+        timestamp: new Date().toLocaleTimeString([], { hour12: false })
+      });
+
+      const recurringLog: TacticalEvent = {
+        id: 'evt-fire-' + Math.random().toString(36).substr(2, 7),
+        timestamp: new Date().toLocaleTimeString([], { hour12: false }),
+        satName: selectedSat.name,
+        satId: selectedSat.id,
+        status: 'CRITICAL',
+        detail: `[AUTOMATED SATELLITE ALERT] Thermal anomaly pulse: ${chosen.name} (${chosen.type}) confirmed on fire at ${chosen.coords}. FRP: ${chosen.frp}MW.`
+      };
+      setEventLogs(prev => [recurringLog, ...prev].slice(0, 50));
+      setHasNewLogs(true);
+    }, 45000);
+
+    return () => clearInterval(fireInterval);
   }, [selectedSat]);
 
   // Source of Truth Telemetry logic
@@ -229,7 +321,7 @@ export const App: React.FC = () => {
       name: 'SIGINT Suite',
       icon: Radio,
       tagline: 'Carrier interception, quantum decryptor, packet sniffer & spectrum canary',
-      views: ['c4isr_terminal', 'intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner', 'telemetry_pulse'] as MainView[]
+      views: ['c4isr_terminal', 'maritime_fire_monitor', 'intelligence', 'interception', 'node_scanner', 'spoof_tracer', 'threat_dossier', 'yara_scanner', 'sniffer', 'analyzer', 'specter', 'traps', 'radio_intercept', 'quantum_decryptor', 'biometric_scanner', 'telemetry_pulse'] as MainView[]
     },
     { 
       id: 'ACTIVE_OPS',
@@ -570,6 +662,13 @@ export const App: React.FC = () => {
                     setEventLogs={setEventLogs}
                     hasNewLogs={hasNewLogs}
                     setHasNewLogs={setHasNewLogs}
+                    hormuzFireAlert={hormuzFireAlert}
+                    onDismissHormuzAlert={() => setHormuzFireAlert(null)}
+                    onOpenMaritimeMonitor={() => setView('maritime_fire_monitor')}
+                    onFocusHormuzChokepoint={() => {
+                      setUserLoc({ lat: 26.50, lng: 56.40 });
+                      addMissionLog('OPERATOR ACTION: Focused ground station coordinates to Strait of Hormuz Chokepoint (26.50°N, 56.40°E)', 'INFO');
+                    }}
                   />
                   <TacticalMap 
                     userLoc={userLoc} 
@@ -583,6 +682,7 @@ export const App: React.FC = () => {
                     weather={weather}
                     onSelectSatellite={setSelectedSat}
                     onOpenC4ISR={() => setView('c4isr_terminal')}
+                    onOpenMaritimeMonitor={() => setView('maritime_fire_monitor')}
                   />
                   <div className="grid grid-cols-1 gap-6">
                     <WeatherDashboard weather={weather} loc={userLoc} satName={selectedSat.name} />
@@ -790,8 +890,29 @@ export const App: React.FC = () => {
                 selectedSatellite={selectedSat}
                 onSelectSatellite={setSelectedSat}
                 onNavigateToMapWithHeatmap={() => setView('tactical')}
+                onNavigateToMaritimeMonitor={() => setView('maritime_fire_monitor')}
                 addMissionLog={addMissionLog}
                 isStealthMode={isStealthMode}
+              />
+            )}
+
+            {view === 'maritime_fire_monitor' && (
+              <MaritimeFireMonitor 
+                onOpenTacticalMap={() => setView('tactical')}
+                addMissionLog={addMissionLog}
+                isStealthMode={isStealthMode}
+                eventLogs={eventLogs}
+                onTriggerAlert={(vessel, fire) => {
+                  setHormuzFireAlert({
+                    active: true,
+                    vesselName: vessel.name,
+                    vesselType: vessel.type,
+                    coordinates: `${fire.lat}°N, ${fire.lng}°E`,
+                    frp: fire.frp,
+                    incidentType: fire.vesselDetails?.incidentType || 'Catastrophic Maritime Thermal Anomaly',
+                    timestamp: new Date().toLocaleTimeString([], { hour12: false })
+                  });
+                }}
               />
             )}
             

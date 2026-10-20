@@ -1248,3 +1248,409 @@ export function getTelstar11NTransportParams(userLoc: Coordinates): Telstar11NTr
     }
   };
 }
+
+/**
+ * 4. MARITIME SHIPPING LANES (Strait of Hormuz & Middle East Strategic Chokepoints)
+ */
+export interface ShippingLane {
+  id: string;
+  name: string;
+  region: string;
+  chokepoint: string;
+  path: Coordinates[];
+  trafficSeparationScheme: boolean;
+  dailyVesselCount: number;
+  crudeFlowMbpd: number; // Millions of Barrels Per Day
+  widthKm: number;
+  riskLevel: 'CRITICAL' | 'ELEVATED' | 'ADVISORY' | 'NOMINAL';
+  description: string;
+}
+
+export const MIDDLE_EAST_SHIPPING_LANES: ShippingLane[] = [
+  {
+    id: 'lane-hormuz-inbound',
+    name: 'Strait of Hormuz - Inbound Traffic Separation Scheme (TSS)',
+    region: 'Strait of Hormuz',
+    chokepoint: 'Musandam Peninsula Northern Arc',
+    path: [
+      { lat: 25.40, lng: 57.20 },
+      { lat: 25.85, lng: 56.80 },
+      { lat: 26.25, lng: 56.55 },
+      { lat: 26.45, lng: 56.35 },
+      { lat: 26.50, lng: 55.80 },
+      { lat: 26.35, lng: 55.00 }
+    ],
+    trafficSeparationScheme: true,
+    dailyVesselCount: 42,
+    crudeFlowMbpd: 11.2,
+    widthKm: 3.7, // 2 nautical miles
+    riskLevel: 'CRITICAL',
+    description: 'Primary inbound commercial tanker route into Persian Gulf; passes within 3 NM of active maritime thermal hotspots.'
+  },
+  {
+    id: 'lane-hormuz-outbound',
+    name: 'Strait of Hormuz - Outbound Traffic Separation Scheme (TSS)',
+    region: 'Strait of Hormuz',
+    chokepoint: 'Larak Island & Quoin Islands Corridor',
+    path: [
+      { lat: 26.55, lng: 54.85 },
+      { lat: 26.70, lng: 55.60 },
+      { lat: 26.65, lng: 56.25 },
+      { lat: 26.40, lng: 56.65 },
+      { lat: 26.00, lng: 57.00 },
+      { lat: 25.50, lng: 57.40 }
+    ],
+    trafficSeparationScheme: true,
+    dailyVesselCount: 46,
+    crudeFlowMbpd: 13.8,
+    widthKm: 3.7,
+    riskLevel: 'CRITICAL',
+    description: 'High-density crude laden supertanker outbound route toward Gulf of Oman and international sea lanes.'
+  },
+  {
+    id: 'lane-musandam-inshore',
+    name: 'Musandam Inshore Traffic Zone (ITZ)',
+    region: 'Strait of Hormuz / Oman',
+    chokepoint: 'Kumzar Cape Coastal Channel',
+    path: [
+      { lat: 26.10, lng: 56.35 },
+      { lat: 26.28, lng: 56.48 },
+      { lat: 26.38, lng: 56.52 },
+      { lat: 26.25, lng: 56.70 }
+    ],
+    trafficSeparationScheme: false,
+    dailyVesselCount: 18,
+    crudeFlowMbpd: 0.8,
+    widthKm: 2.2,
+    riskLevel: 'ELEVATED',
+    description: 'Coastal feeder and patrol boat channel navigating the steep cliffs of Musandam peninsula.'
+  },
+  {
+    id: 'lane-fujairah-anchorage',
+    name: 'Fujairah Deepwater Bunkering & Anchorage Lane',
+    region: 'Gulf of Oman / UAE',
+    chokepoint: 'Fujairah Port Offshore Sector',
+    path: [
+      { lat: 25.05, lng: 56.55 },
+      { lat: 25.30, lng: 56.65 },
+      { lat: 25.55, lng: 56.80 }
+    ],
+    trafficSeparationScheme: false,
+    dailyVesselCount: 65,
+    crudeFlowMbpd: 4.5,
+    widthKm: 5.5,
+    riskLevel: 'ELEVATED',
+    description: 'World top-3 bunkering hub and crude bypass terminal exit lane into the Indian Ocean.'
+  },
+  {
+    id: 'lane-persian-gulf-central',
+    name: 'Persian Gulf Central Tanker Fairway',
+    region: 'Persian Gulf',
+    chokepoint: 'Central Gulf Deepwater Basin',
+    path: [
+      { lat: 29.10, lng: 49.50 },
+      { lat: 28.20, lng: 51.00 },
+      { lat: 27.20, lng: 52.80 },
+      { lat: 26.40, lng: 54.50 }
+    ],
+    trafficSeparationScheme: false,
+    dailyVesselCount: 55,
+    crudeFlowMbpd: 16.5,
+    widthKm: 7.0,
+    riskLevel: 'ELEVATED',
+    description: 'Major transit route connecting Kharg Island, Kuwait, and Saudi loading ports to Strait of Hormuz.'
+  },
+  {
+    id: 'lane-bab-el-mandeb',
+    name: 'Bab el-Mandeb Chokepoint & Southern Red Sea TSS',
+    region: 'Southern Red Sea',
+    chokepoint: 'Perim Island Strait',
+    path: [
+      { lat: 12.45, lng: 43.50 },
+      { lat: 12.65, lng: 43.35 },
+      { lat: 13.00, lng: 43.15 },
+      { lat: 13.60, lng: 42.80 }
+    ],
+    trafficSeparationScheme: true,
+    dailyVesselCount: 38,
+    crudeFlowMbpd: 6.2,
+    widthKm: 3.5,
+    riskLevel: 'CRITICAL',
+    description: 'Strategic chokepoint between Horn of Africa and Arabian Peninsula with elevated coastal threat vectors.'
+  }
+];
+
+/**
+ * 5. LIVE GLOBAL MARITIME AIS TRACKING FLEET
+ */
+export interface MaritimeAisVessel {
+  mmsi: string;
+  imo: string;
+  vesselName: string;
+  callSign: string;
+  vesselType: string;
+  flag: string;
+  dwt: number;
+  lat: number;
+  lng: number;
+  cog: number; // Course Over Ground (degrees)
+  sog: number; // Speed Over Ground (knots)
+  navStatus: 'Underway Using Engine' | 'Not Under Command' | 'At Anchor' | 'Restricted Manoeuvrability' | 'Moored' | 'Engulfed in Flame / Distress';
+  destination: string;
+  eta: string;
+  assignedLaneId: string;
+  activeFireIncidentId?: string;
+  proximityToNearestFireKm: number;
+  threatLevel: 'CRITICAL_FIRE' | 'HIGH_HAZARD' | 'ADVISORY' | 'NOMINAL';
+  vsatStatus: 'Nominal' | 'Degraded' | 'Emergency Telemetry Loop' | 'Silent / Damaged';
+}
+
+export const LIVE_AIS_FLEET: MaritimeAisVessel[] = [
+  {
+    mmsi: '636019482',
+    imo: '9784321',
+    vesselName: 'Front Empress',
+    callSign: 'D5QW2',
+    vesselType: 'VLCC Crude Oil Tanker',
+    flag: 'Marshall Islands',
+    dwt: 320000,
+    lat: 26.38,
+    lng: 56.62,
+    cog: 312,
+    sog: 2.1,
+    navStatus: 'Engulfed in Flame / Distress',
+    destination: 'Ras Tanura (KSA)',
+    eta: 'OVERDUE (DISTRESS)',
+    assignedLaneId: 'lane-hormuz-inbound',
+    activeFireIncidentId: 'fire-hormuz-ship-01',
+    proximityToNearestFireKm: 0.1,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Emergency Telemetry Loop'
+  },
+  {
+    mmsi: '311000842',
+    imo: '9421109',
+    vesselName: 'Stolt Valor Class',
+    callSign: 'C6XY8',
+    vesselType: 'Chemical & Parcel Tanker',
+    flag: 'Bahamas',
+    dwt: 44000,
+    lat: 26.22,
+    lng: 56.45,
+    cog: 298,
+    sog: 0.0,
+    navStatus: 'Engulfed in Flame / Distress',
+    destination: 'Jebel Ali (UAE)',
+    eta: 'DELAYED',
+    assignedLaneId: 'lane-musandam-inshore',
+    activeFireIncidentId: 'fire-hormuz-ship-02',
+    proximityToNearestFireKm: 0.2,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Emergency Telemetry Loop'
+  },
+  {
+    mmsi: 'IRN-9021',
+    imo: 'MIL-8902',
+    vesselName: 'IRGC Fast Attack Craft 09',
+    callSign: 'EP-902',
+    vesselType: 'Fast Missile Patrol Craft',
+    flag: 'Iran (Naval)',
+    dwt: 120,
+    lat: 26.86,
+    lng: 56.38,
+    cog: 180,
+    sog: 0.5,
+    navStatus: 'Engulfed in Flame / Distress',
+    destination: 'Bandar Abbas',
+    eta: 'IMMEDIATE',
+    assignedLaneId: 'lane-hormuz-outbound',
+    activeFireIncidentId: 'fire-hormuz-ship-03',
+    proximityToNearestFireKm: 0.1,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Silent / Damaged'
+  },
+  {
+    mmsi: '538008123',
+    imo: '9654123',
+    vesselName: 'Pacific Apex',
+    callSign: 'V7AB8',
+    vesselType: 'Suezmax Crude Tanker',
+    flag: 'Marshall Islands',
+    dwt: 158000,
+    lat: 25.28,
+    lng: 56.68,
+    cog: 145,
+    sog: 4.8,
+    navStatus: 'Restricted Manoeuvrability',
+    destination: 'Singapore Port',
+    eta: '2026-10-24 18:00',
+    assignedLaneId: 'lane-fujairah-anchorage',
+    activeFireIncidentId: 'fire-hormuz-ship-04',
+    proximityToNearestFireKm: 0.4,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Degraded'
+  },
+  {
+    mmsi: '538003421',
+    imo: '9397315',
+    vesselName: 'Al-Ghashamiya LNG',
+    callSign: 'V7LM4',
+    vesselType: 'Q-Flex LNG Carrier (216,000 m³)',
+    flag: 'Marshall Islands',
+    dwt: 122000,
+    lat: 26.15,
+    lng: 56.12,
+    cog: 285,
+    sog: 7.4,
+    navStatus: 'Restricted Manoeuvrability',
+    destination: 'Ras Laffan (QAT)',
+    eta: '2026-10-20 22:30',
+    assignedLaneId: 'lane-hormuz-inbound',
+    activeFireIncidentId: 'fire-hormuz-ship-07',
+    proximityToNearestFireKm: 0.3,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Emergency Telemetry Loop'
+  },
+  {
+    mmsi: '240889000',
+    imo: '9512344',
+    vesselName: 'Delta Poseidon',
+    callSign: 'SVA99',
+    vesselType: 'Suezmax Crude Oil Tanker',
+    flag: 'Greece',
+    dwt: 162000,
+    lat: 25.82,
+    lng: 57.08,
+    cog: 120,
+    sog: 3.2,
+    navStatus: 'Not Under Command',
+    destination: 'Ningbo (CHN)',
+    eta: '2026-10-28 08:00',
+    assignedLaneId: 'lane-hormuz-outbound',
+    activeFireIncidentId: 'fire-hormuz-ship-08',
+    proximityToNearestFireKm: 0.2,
+    threatLevel: 'CRITICAL_FIRE',
+    vsatStatus: 'Emergency Telemetry Loop'
+  },
+  {
+    mmsi: '477218900',
+    imo: '9812456',
+    vesselName: 'Cosco Pride of Asia',
+    callSign: 'VRXY2',
+    vesselType: 'Ultra-Large Container Vessel (20,000 TEU)',
+    flag: 'Hong Kong',
+    dwt: 198000,
+    lat: 25.95,
+    lng: 56.92,
+    cog: 310,
+    sog: 16.4,
+    navStatus: 'Underway Using Engine',
+    destination: 'Jebel Ali (UAE)',
+    eta: '2026-10-20 14:00',
+    assignedLaneId: 'lane-hormuz-inbound',
+    proximityToNearestFireKm: 8.5,
+    threatLevel: 'HIGH_HAZARD',
+    vsatStatus: 'Nominal'
+  },
+  {
+    mmsi: '228341600',
+    imo: '9691238',
+    vesselName: 'CMA CGM Jules Verne',
+    callSign: 'FNPH',
+    vesselType: 'Container Ship (16,000 TEU)',
+    flag: 'France',
+    dwt: 186000,
+    lat: 26.48,
+    lng: 56.18,
+    cog: 135,
+    sog: 14.8,
+    navStatus: 'Underway Using Engine',
+    destination: 'Port Klang (MYS)',
+    eta: '2026-10-26 12:00',
+    assignedLaneId: 'lane-hormuz-outbound',
+    proximityToNearestFireKm: 11.2,
+    threatLevel: 'HIGH_HAZARD',
+    vsatStatus: 'Nominal'
+  },
+  {
+    mmsi: '636015522',
+    imo: '9523120',
+    vesselName: 'Maran Andromeda',
+    callSign: 'D5RT9',
+    vesselType: 'VLCC Supertanker',
+    flag: 'Liberia',
+    dwt: 318000,
+    lat: 26.68,
+    lng: 55.45,
+    cog: 118,
+    sog: 12.6,
+    navStatus: 'Underway Using Engine',
+    destination: 'Ulsan (KOR)',
+    eta: '2026-10-29 06:00',
+    assignedLaneId: 'lane-hormuz-outbound',
+    proximityToNearestFireKm: 14.1,
+    threatLevel: 'ADVISORY',
+    vsatStatus: 'Nominal'
+  },
+  {
+    mmsi: '352001889',
+    imo: '9488111',
+    vesselName: 'Oceania Pioneer',
+    callSign: '3E211',
+    vesselType: 'LPG Gas Carrier (84,000 m³)',
+    flag: 'Panama',
+    dwt: 55000,
+    lat: 25.18,
+    lng: 56.75,
+    cog: 338,
+    sog: 15.2,
+    navStatus: 'Underway Using Engine',
+    destination: 'Mina Al-Ahmadi (KWT)',
+    eta: '2026-10-21 19:30',
+    assignedLaneId: 'lane-fujairah-anchorage',
+    proximityToNearestFireKm: 9.8,
+    threatLevel: 'HIGH_HAZARD',
+    vsatStatus: 'Nominal'
+  },
+  {
+    mmsi: '563098221',
+    imo: '9602234',
+    vesselName: 'Maersk Mc-Kinney',
+    callSign: '9V551',
+    vesselType: 'Triple-E Container Vessel',
+    flag: 'Singapore',
+    dwt: 196000,
+    lat: 26.32,
+    lng: 55.15,
+    cog: 305,
+    sog: 17.1,
+    navStatus: 'Underway Using Engine',
+    destination: 'Dammam (KSA)',
+    eta: '2026-10-21 04:00',
+    assignedLaneId: 'lane-persian-gulf-central',
+    proximityToNearestFireKm: 18.4,
+    threatLevel: 'NOMINAL',
+    vsatStatus: 'Nominal'
+  },
+  {
+    mmsi: '257002440',
+    imo: '9741289',
+    vesselName: 'Golar Arctic',
+    callSign: 'LARK8',
+    vesselType: 'LNG Gas Carrier',
+    flag: 'Norway',
+    dwt: 82000,
+    lat: 27.10,
+    lng: 53.10,
+    cog: 122,
+    sog: 16.0,
+    navStatus: 'Underway Using Engine',
+    destination: 'Tokyo Bay (JPN)',
+    eta: '2026-10-31 10:00',
+    assignedLaneId: 'lane-persian-gulf-central',
+    proximityToNearestFireKm: 22.0,
+    threatLevel: 'NOMINAL',
+    vsatStatus: 'Nominal'
+  }
+];
+

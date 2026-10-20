@@ -46,6 +46,7 @@ interface TacticalMapProps {
   weather?: string;
   onSelectSatellite?: (sat: Satellite) => void;
   onOpenC4ISR?: () => void;
+  onOpenMaritimeMonitor?: () => void;
 }
 
 export const TacticalMap: React.FC<TacticalMapProps> = ({
@@ -59,7 +60,8 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
   jammingPower = 20,
   weather = 'CLEAR',
   onSelectSatellite,
-  onOpenC4ISR
+  onOpenC4ISR,
+  onOpenMaritimeMonitor
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoverCoord, setHoverCoord] = useState<Coordinates | null>(null);
@@ -315,6 +317,18 @@ export const TacticalMap: React.FC<TacticalMapProps> = ({
             >
               <Radio className="w-2.5 h-2.5" />
               <span>C4ISR NODE</span>
+            </button>
+          )}
+
+          {onOpenMaritimeMonitor && (
+            <button
+              onClick={onOpenMaritimeMonitor}
+              className="px-2 py-0.5 rounded bg-red-950/80 hover:bg-red-900 border border-red-700/80 text-red-300 hover:text-white text-[7.5px] font-mono font-black flex items-center space-x-1 transition-all shadow-[0_0_8px_rgba(239,68,68,0.3)] animate-pulse"
+              title="Open Maritime Fire Monitor: AIS Tracking & NASA FIRMS Correlator for Strait of Hormuz"
+            >
+              <Ship className="w-2.5 h-2.5 text-cyan-400" />
+              <Flame className="w-2.5 h-2.5 text-red-400" />
+              <span>MARITIME MONITOR</span>
             </button>
           )}
         </div>

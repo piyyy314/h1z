@@ -2,9 +2,19 @@ import React, { useState } from 'react';
 import { 
   MapPin, Radio, Shield, HelpCircle, AlertTriangle, 
   Clock, Sun, CloudRain, CloudAlert, Compass, Globe, 
-  Wifi, RefreshCw, Cpu
+  Wifi, RefreshCw, Cpu, Flame, Ship, AlertOctagon
 } from 'lucide-react';
 import { Satellite, Coordinates, WeatherCondition, TacticalEvent } from '../types.ts';
+
+export interface HormuzFireAlert {
+  active: boolean;
+  vesselName: string;
+  vesselType: string;
+  coordinates: string;
+  frp: number;
+  incidentType: string;
+  timestamp: string;
+}
 
 interface TacticalHUDProps {
   loc: Coordinates;
@@ -31,6 +41,10 @@ interface TacticalHUDProps {
   setEventLogs: React.Dispatch<React.SetStateAction<TacticalEvent[]>>;
   hasNewLogs: boolean;
   setHasNewLogs: (hasNew: boolean) => void;
+  hormuzFireAlert?: HormuzFireAlert | null;
+  onDismissHormuzAlert?: () => void;
+  onOpenMaritimeMonitor?: () => void;
+  onFocusHormuzChokepoint?: () => void;
 }
 
 export const TacticalHUD: React.FC<TacticalHUDProps> = ({
@@ -55,7 +69,11 @@ export const TacticalHUD: React.FC<TacticalHUDProps> = ({
   telemetry,
   eventLogs,
   setEventLogs,
-  setHasNewLogs
+  setHasNewLogs,
+  hormuzFireAlert,
+  onDismissHormuzAlert,
+  onOpenMaritimeMonitor,
+  onFocusHormuzChokepoint
 }) => {
   const [latInput, setLatInput] = useState(loc.lat.toString());
   const [lngInput, setLngInput] = useState(loc.lng.toString());
@@ -154,6 +172,70 @@ export const TacticalHUD: React.FC<TacticalHUDProps> = ({
           TSI_STATION_CMD
         </span>
       </div>
+
+      {/* Visual Flashing Warning for Strait of Hormuz Maritime Fires */}
+      {hormuzFireAlert?.active && (
+        <div className="p-3.5 bg-red-950/90 border-2 border-red-500 rounded-2xl flex flex-col space-y-2 shadow-[0_0_25px_rgba(239,68,68,0.7)] animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Flame className="w-4 h-4 text-red-400 animate-bounce" />
+              <Ship className="w-4 h-4 text-cyan-300" />
+              <span className="text-[10px] font-mono font-black text-red-100 tracking-wider uppercase">
+                [HORMUZ EMERGENCY] NEW MARITIME SHIP FIRE
+              </span>
+            </div>
+            <span className="text-[7.5px] font-mono bg-red-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-wider animate-ping">
+              FLASH ALERT
+            </span>
+          </div>
+
+          <div className="text-[9px] font-mono text-red-200 space-y-1 bg-black/60 p-2.5 rounded-xl border border-red-800/80">
+            <div className="flex items-center justify-between">
+              <span>VESSEL: <strong className="text-white">{hormuzFireAlert.vesselName}</strong></span>
+              <span className="text-amber-400 font-bold">{hormuzFireAlert.vesselType}</span>
+            </div>
+            <div className="flex items-center justify-between text-slate-300">
+              <span>COORDS: <strong className="text-amber-300">{hormuzFireAlert.coordinates}</strong></span>
+              <span>FRP: <strong className="text-red-400 font-bold">{hormuzFireAlert.frp} MW</strong></span>
+            </div>
+            <div className="text-red-300 text-[8.5px] pt-1 border-t border-red-900/60 truncate">
+              ⚠️ {hormuzFireAlert.incidentType}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-1.5 pt-1">
+            {onOpenMaritimeMonitor && (
+              <button
+                type="button"
+                onClick={onOpenMaritimeMonitor}
+                className="flex-1 py-1.5 bg-cyan-950 hover:bg-cyan-900 border border-cyan-500 text-cyan-300 text-[8.5px] font-mono font-bold rounded-lg uppercase transition flex items-center justify-center space-x-1 shadow-sm"
+              >
+                <Ship className="w-3 h-3 text-cyan-400" />
+                <span>MARITIME MONITOR</span>
+              </button>
+            )}
+            {onFocusHormuzChokepoint && (
+              <button
+                type="button"
+                onClick={onFocusHormuzChokepoint}
+                className="flex-1 py-1.5 bg-red-900 hover:bg-red-800 border border-red-500 text-white text-[8.5px] font-mono font-black rounded-lg uppercase transition flex items-center justify-center space-x-1 shadow-sm"
+              >
+                <Compass className="w-3 h-3 text-red-200" />
+                <span>FOCUS HORMUZ</span>
+              </button>
+            )}
+            {onDismissHormuzAlert && (
+              <button
+                type="button"
+                onClick={onDismissHormuzAlert}
+                className="px-2 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-[8px] font-mono rounded-lg uppercase transition"
+              >
+                SILENCE
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Target Satellite Selection */}
       <div className="flex flex-col space-y-1.5">

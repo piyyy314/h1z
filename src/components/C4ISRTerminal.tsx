@@ -23,6 +23,7 @@ interface C4ISRTerminalProps {
   selectedSatellite: Satellite;
   onSelectSatellite?: (sat: Satellite) => void;
   onNavigateToMapWithHeatmap?: () => void;
+  onNavigateToMaritimeMonitor?: () => void;
   addMissionLog: (detail: string, status?: 'active' | 'success' | 'warning') => void;
   isStealthMode?: boolean;
 }
@@ -108,6 +109,7 @@ export const C4ISRTerminal: React.FC<C4ISRTerminalProps> = ({
   selectedSatellite,
   onSelectSatellite,
   onNavigateToMapWithHeatmap,
+  onNavigateToMaritimeMonitor,
   addMissionLog,
   isStealthMode = false
 }) => {
@@ -677,15 +679,26 @@ export const C4ISRTerminal: React.FC<C4ISRTerminalProps> = ({
               </p>
             </div>
 
-            {onNavigateToMapWithHeatmap && (
-              <button
-                onClick={onNavigateToMapWithHeatmap}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-500 text-slate-950 text-[8.5px] font-mono font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center space-x-1.5"
-              >
-                <Flame className="w-3.5 h-3.5" />
-                <span>OPEN TACTICAL MAP HEATMAP</span>
-              </button>
-            )}
+            <div className="flex items-center space-x-2">
+              {onNavigateToMaritimeMonitor && (
+                <button
+                  onClick={onNavigateToMaritimeMonitor}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[8.5px] font-mono font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center space-x-1.5"
+                >
+                  <Ship className="w-3.5 h-3.5 text-cyan-200" />
+                  <span>MARITIME FIRE MONITOR (AIS)</span>
+                </button>
+              )}
+              {onNavigateToMapWithHeatmap && (
+                <button
+                  onClick={onNavigateToMapWithHeatmap}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-red-500 text-slate-950 text-[8.5px] font-mono font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] flex items-center space-x-1.5"
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>OPEN TACTICAL MAP HEATMAP</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
